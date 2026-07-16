@@ -232,6 +232,7 @@ class StudentEnrollmentViewSet(viewsets.ModelViewSet):
         if (
             user.is_authenticated
             and user.role == User.Role.STUDENT
+            and self.request.method in permissions.SAFE_METHODS
         ):
             return [
                 IsApprovedUser(),
