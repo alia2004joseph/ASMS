@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "schools",
     "academics",
     "grading",
+    
+    "timetable",
 ]
 
 
