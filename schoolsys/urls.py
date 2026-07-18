@@ -28,6 +28,8 @@ urlpatterns = [
     path("api/grading/", include("grading.urls")),
     path("api/timetable/", include("timetable.urls")),
     path("api/attendance/", include("attendance.urls")),
+    path("api/auth/", include("accounts.auth_urls")),
+    path("api/finance/", include("finance.urls")),
     
 ]
 

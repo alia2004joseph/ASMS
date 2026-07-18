@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+AUTH_USER_MODEL ="accounts.User"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     
     "rest_framework",
     "corsheaders",
-    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     
     "accounts",
     "schools",
@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     "grading",
     "attendance",
     "timetable",
+    "finance",
+
+    
 ]
 
 
@@ -62,6 +65,9 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.ScopedRateThrottle",
     ],
+
+    "DEFAULT_PAGINATION_CLASS": ("rest_framework.pagination.PageNumberPagination"),
+    "PAGE_SIZE": 20,
     # These two scopes are required — RegisterView and CustomLoginView
     # both set throttle_scope, and DRF raises ImproperlyConfigured on
     # first request to those views if the matching rate isn't defined
@@ -85,6 +91,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -166,3 +173,8 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",]
