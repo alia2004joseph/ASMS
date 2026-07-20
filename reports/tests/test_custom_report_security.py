@@ -15,11 +15,20 @@ from reports.services import report_registry_service
 
 
 class FakeUser:
-    def __init__(self, role, is_superuser=False):
+    def __init__(
+        self,
+        role,
+        is_superuser=False,
+        is_authenticated=True,
+        is_active=True,
+        school=None,
+    ):
         self.role = role
         self.is_superuser = is_superuser
-
-
+        self.is_authenticated = is_authenticated
+        self.is_active = is_active
+        self.school = school
+        self.school_id = getattr(school, "pk", None)
 def test_admin_sees_all_whitelisted_sources():
     user = FakeUser("ADMIN")
     sources = report_registry_service.get_available_sources(user)
@@ -91,6 +100,7 @@ class TestCustomReportServiceSecurity:
 
         fake_model = MagicMock()
         fake_model.objects = fake_manager
+        fake_model._default_manager = fake_manager
 
         monkeypatch.setattr(
             "reports.services.custom_report_service.apps.get_model",
