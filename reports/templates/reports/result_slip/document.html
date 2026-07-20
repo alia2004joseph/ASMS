@@ -1,0 +1,128 @@
+{% comment %}
+Professional Result Slip template for ASMS.
+Backwards compatible with the original context.
+{% endcomment %}
+
+{% include "reports/shared/_base_styles.html" %}
+{% with document_title="Student Result Slip" %}
+{% include "reports/shared/_header_letterhead.html" %}
+{% endwith %}
+
+<main class="document-body result-slip-document">
+
+<section class="document-status-bar">
+    <span class="status-badge status-badge--info">Academic Results</span>
+    {% if document_number %}
+    <div class="document-reference">
+        <span class="document-reference__label">Slip No.</span>
+        <span class="document-reference__value">{{ document_number }}</span>
+    </div>
+    {% endif %}
+</section>
+
+<section class="section-card">
+<div class="section-heading">
+<div>
+<div class="section-heading__eyebrow">Student Information</div>
+<h2 class="section-heading__title">Candidate Details</h2>
+</div>
+</div>
+
+<div class="meta-grid">
+<div class="field"><span class="label">Student Name</span><span class="value">{{ student_name|default:"—" }}</span></div>
+<div class="field"><span class="label">Student Number</span><span class="value value--mono">{{ student_number|default:"—" }}</span></div>
+<div class="field"><span class="label">Class</span><span class="value">{{ classroom|default:"—" }}</span></div>
+<div class="field"><span class="label">Academic Year</span><span class="value">{{ academic_year|default:"—" }}</span></div>
+<div class="field"><span class="label">Term</span><span class="value">{{ term|default:"—" }}</span></div>
+{% if programme_name %}
+<div class="field"><span class="label">Programme</span><span class="value">{{ programme_name }}</span></div>
+{% endif %}
+</div>
+</section>
+
+<section class="summary-grid">
+<div class="summary-card">
+<div class="summary-card__label">Aggregate / GPA</div>
+<div class="summary-card__value">{{ aggregate_or_gpa|default:"—" }}</div>
+</div>
+
+{% if position %}
+<div class="summary-card">
+<div class="summary-card__label">Class Position</div>
+<div class="summary-card__value">{{ position }}</div>
+</div>
+{% endif %}
+
+<div class="summary-card">
+<div class="summary-card__label">Class Average</div>
+<div class="summary-card__value">{{ class_average|default:"—" }}</div>
+</div>
+
+<div class="summary-card">
+<div class="summary-card__label">Final Status</div>
+<div class="summary-card__value">{{ pass_fail_status|default:"Pending" }}</div>
+</div>
+</section>
+
+<section class="section-card">
+<div class="section-heading">
+<div>
+<div class="section-heading__eyebrow">Academic Performance</div>
+<h2 class="section-heading__title">Subject Results</h2>
+</div>
+</div>
+
+<div class="table-wrapper">
+<table class="data-table">
+<thead>
+<tr>
+<th>Subject</th>
+<th class="text-center">Marks</th>
+<th class="text-center">Grade</th>
+<th>Remarks</th>
+</tr>
+</thead>
+<tbody>
+{% for subject in subjects_snapshot %}
+<tr>
+<td><strong>{{ subject.subject }}</strong></td>
+<td class="text-center">{{ subject.marks }}</td>
+<td class="text-center">{{ subject.grade }}</td>
+<td>{{ subject.remarks }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="4" class="empty-state">No subject records available.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+
+<aside class="document-notice document-notice--neutral">
+<div class="document-notice__icon">✓</div>
+<div>
+<div class="document-notice__title">Academic Result Summary</div>
+<div class="document-notice__text">
+This result slip reflects the approved assessment results recorded in the Academic Management System. Verify authenticity using the QR code below.
+</div>
+</div>
+</aside>
+
+<section class="transcript-certification avoid-break">
+<div class="transcript-certification__signing-area">
+<div class="transcript-certification__stamp">
+{% include "reports/shared/_stamp_block.html" %}
+</div>
+<div class="transcript-certification__signature">
+{% include "reports/shared/_signature_block.html" %}
+</div>
+</div>
+
+<div class="transcript-certification__verification">
+{% include "reports/shared/_qr_block.html" %}
+</div>
+</section>
+
+</main>
+
+{% include "reports/shared/_footer.html" %}

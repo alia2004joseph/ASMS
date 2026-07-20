@@ -1,0 +1,260 @@
+{% comment %}
+Professional Student Report Card template for ASMS.
+
+Expected context:
+- student_name
+- student_number
+- classroom
+- academic_year
+- term
+- grading_display_format
+- subjects
+- aggregate_or_gpa
+- position (optional)
+- class_average
+- pass_fail_status
+- attendance_summary (optional)
+- class_teacher_comment (optional)
+- head_teacher_comment (optional)
+- next_term_begins (optional)
+- document_number (optional)
+- branding
+- created_at
+- signature/stamp/QR context used by shared components
+
+The template remains backward compatible with the original minimum context.
+{% endcomment %}
+
+{% include "reports/shared/_base_styles.html" %}
+
+{% with document_title="Student Report Card" %}
+    {% include "reports/shared/_header_letterhead.html" %}
+{% endwith %}
+
+<main class="document-body report-card-document">
+    <section class="document-status-bar">
+        <div>
+            <span class="status-badge status-badge--info">
+                End-of-Term Academic Report
+            </span>
+        </div>
+
+        {% if document_number %}
+            <div class="document-reference">
+                <span class="document-reference__label">Report No.</span>
+                <span class="document-reference__value">{{ document_number }}</span>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="section-card report-card-student-profile">
+        <div class="section-heading">
+            <div>
+                <div class="section-heading__eyebrow">Learner Information</div>
+                <h2 class="section-heading__title">Student Details</h2>
+            </div>
+        </div>
+
+        <div class="meta-grid">
+            <div class="field">
+                <span class="label">Student Name</span>
+                <span class="value">{{ student_name|default:"—" }}</span>
+            </div>
+
+            <div class="field">
+                <span class="label">Student Number</span>
+                <span class="value value--mono">{{ student_number|default:"—" }}</span>
+            </div>
+
+            <div class="field">
+                <span class="label">Class</span>
+                <span class="value">{{ classroom|default:"—" }}</span>
+            </div>
+
+            <div class="field">
+                <span class="label">Academic Year</span>
+                <span class="value">{{ academic_year|default:"—" }}</span>
+            </div>
+
+            <div class="field">
+                <span class="label">Term</span>
+                <span class="value">{{ term|default:"—" }}</span>
+            </div>
+
+            <div class="field">
+                <span class="label">Grading Format</span>
+                <span class="value">{{ grading_display_format|default:"Standard" }}</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="summary-grid report-card-summary">
+        <div class="summary-card">
+            <div class="summary-card__label">Aggregate / GPA</div>
+            <div class="summary-card__value">{{ aggregate_or_gpa|default:"—" }}</div>
+            <div class="summary-card__caption">Overall academic result</div>
+        </div>
+
+        {% if position %}
+            <div class="summary-card">
+                <div class="summary-card__label">Class Position</div>
+                <div class="summary-card__value">{{ position }}</div>
+                <div class="summary-card__caption">Relative class ranking</div>
+            </div>
+        {% endif %}
+
+        <div class="summary-card">
+            <div class="summary-card__label">Class Average</div>
+            <div class="summary-card__value">{{ class_average|default:"—" }}</div>
+            <div class="summary-card__caption">Average for the learner's class</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-card__label">Final Status</div>
+            <div class="summary-card__value">{{ pass_fail_status|default:"Pending" }}</div>
+            <div class="summary-card__caption">Term completion status</div>
+        </div>
+    </section>
+
+    <section class="section-card report-card-results">
+        <div class="section-heading">
+            <div>
+                <div class="section-heading__eyebrow">Academic Performance</div>
+                <h2 class="section-heading__title">Subject Results</h2>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table report-card-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Subject</th>
+                        <th scope="col" class="text-center">Marks</th>
+                        <th scope="col" class="text-center">Grade</th>
+                        <th scope="col">Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in subjects %}
+                        <tr>
+                            <td><strong>{{ subject.name }}</strong></td>
+                            <td class="text-center">{{ subject.marks|default:"—" }}</td>
+                            <td class="text-center">{{ subject.grade|default:"—" }}</td>
+                            <td>{{ subject.remarks|default:"—" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                No subject records are available for this reporting period.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    {% if attendance_summary %}
+        <section class="section-card report-card-attendance avoid-break">
+            <div class="section-heading section-heading--compact">
+                <div>
+                    <div class="section-heading__eyebrow">Attendance</div>
+                    <h2 class="section-heading__title">Attendance Summary</h2>
+                </div>
+            </div>
+
+            <div class="meta-grid">
+                {% if attendance_summary.days_present %}
+                    <div class="field">
+                        <span class="label">Days Present</span>
+                        <span class="value">{{ attendance_summary.days_present }}</span>
+                    </div>
+                {% endif %}
+
+                {% if attendance_summary.days_absent %}
+                    <div class="field">
+                        <span class="label">Days Absent</span>
+                        <span class="value">{{ attendance_summary.days_absent }}</span>
+                    </div>
+                {% endif %}
+
+                {% if attendance_summary.total_days %}
+                    <div class="field">
+                        <span class="label">Total School Days</span>
+                        <span class="value">{{ attendance_summary.total_days }}</span>
+                    </div>
+                {% endif %}
+
+                {% if attendance_summary.percentage %}
+                    <div class="field">
+                        <span class="label">Attendance Rate</span>
+                        <span class="value">{{ attendance_summary.percentage }}%</span>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    {% endif %}
+
+    {% if class_teacher_comment or head_teacher_comment or next_term_begins %}
+        <section class="section-card report-card-comments avoid-break">
+            <div class="section-heading section-heading--compact">
+                <div>
+                    <div class="section-heading__eyebrow">School Remarks</div>
+                    <h2 class="section-heading__title">Comments and Guidance</h2>
+                </div>
+            </div>
+
+            {% if class_teacher_comment %}
+                <div class="comment-block">
+                    <div class="comment-block__label">Class Teacher's Comment</div>
+                    <div class="comment-block__text">{{ class_teacher_comment }}</div>
+                </div>
+            {% endif %}
+
+            {% if head_teacher_comment %}
+                <div class="comment-block">
+                    <div class="comment-block__label">Head Teacher's Comment</div>
+                    <div class="comment-block__text">{{ head_teacher_comment }}</div>
+                </div>
+            {% endif %}
+
+            {% if next_term_begins %}
+                <div class="document-notice document-notice--neutral">
+                    <div class="document-notice__icon">i</div>
+                    <div>
+                        <div class="document-notice__title">Next Term Begins</div>
+                        <div class="document-notice__text">{{ next_term_begins }}</div>
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <aside class="document-notice document-notice--neutral">
+        <div class="document-notice__icon">✓</div>
+        <div>
+            <div class="document-notice__title">Official Academic Report</div>
+            <div class="document-notice__text">
+                This report card reflects the approved academic records for the stated term. Its authenticity may be confirmed using the QR code or verification reference below.
+            </div>
+        </div>
+    </aside>
+
+    <section class="transcript-certification avoid-break">
+        <div class="transcript-certification__signing-area">
+            <div class="transcript-certification__stamp">
+                {% include "reports/shared/_stamp_block.html" %}
+            </div>
+
+            <div class="transcript-certification__signature">
+                {% include "reports/shared/_signature_block.html" %}
+            </div>
+        </div>
+
+        <div class="transcript-certification__verification">
+            {% include "reports/shared/_qr_block.html" %}
+        </div>
+    </section>
+</main>
+
+{% include "reports/shared/_footer.html" %}

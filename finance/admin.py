@@ -548,7 +548,7 @@ class FinancialTransactionAdmin(SchoolScopedAdminMixin, admin.ModelAdmin):
     ]
     list_filter = ["school", "transaction_type"]
     search_fields = ["reference", "description"]
-    ordering = ["-created_at"]
+    ordering = ["-created_at", "-pk"]
     list_select_related = ["school", "student", "invoice", "payment", "expense", "created_by"]
     date_hierarchy = "created_at"
     readonly_fields = [

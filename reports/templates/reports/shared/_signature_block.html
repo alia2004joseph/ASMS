@@ -1,0 +1,104 @@
+{% comment %}
+Professional shared signature block for ASMS-generated documents.
+
+Expected context:
+- signatory_name
+- signatory_title
+- signature_image
+- position:
+    zone
+    alignment
+    width
+- signature_verified (optional)
+- signature_date (optional)
+- signatory_department (optional)
+- signatory_credentials (optional)
+- verification_reference (optional)
+
+Behaviour:
+- Renders nothing when no valid signatory is configured.
+- Accepts either a Django File/ImageField object or a direct image URL.
+- Uses CSS classes from shared/_base_styles.html.
+- Avoids inline business logic and fails gracefully when optional data
+  is unavailable.
+{% endcomment %}
+
+{% if signatory_name %}
+    <section
+        class="
+            signature-block
+            {% if position.zone == 'bottom_right' or position.alignment == 'right' %}
+                signature-block--right
+            {% elif position.zone == 'bottom_center' or position.alignment == 'center' %}
+                signature-block--center
+            {% else %}
+                signature-block--left
+            {% endif %}
+        "
+        aria-label="Authorized signature"
+        {% if position.width %}style="width: {{ position.width }};"{% endif %}
+    >
+        <div class="signature-block__content">
+            <div class="signature-block__image-area">
+                {% if signature_image %}
+                    <img
+                        class="signature-block__image"
+                        src="{{ signature_image.url|default:signature_image }}"
+                        alt="Authorized signature of {{ signatory_name }}"
+                    >
+                {% else %}
+                    <div class="signature-block__image-placeholder" aria-hidden="true"></div>
+                {% endif %}
+            </div>
+
+            <div class="signature-block__line" aria-hidden="true"></div>
+
+            <div class="signature-block__identity">
+                <div class="signature-block__name">
+                    {{ signatory_name }}
+                </div>
+
+                {% if signatory_credentials %}
+                    <div class="signature-block__credentials">
+                        {{ signatory_credentials }}
+                    </div>
+                {% endif %}
+
+                {% if signatory_title %}
+                    <div class="signature-block__title">
+                        {{ signatory_title }}
+                    </div>
+                {% endif %}
+
+                {% if signatory_department %}
+                    <div class="signature-block__department">
+                        {{ signatory_department }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if signature_date or signature_verified or verification_reference %}
+                <div class="signature-block__meta">
+                    {% if signature_date %}
+                        <div class="signature-block__date">
+                            Signed: {{ signature_date }}
+                        </div>
+                    {% endif %}
+
+                    {% if signature_verified %}
+                        <div class="signature-block__verified">
+                            <span class="signature-block__verified-mark">✓</span>
+                            Digitally verified
+                        </div>
+                    {% endif %}
+
+                    {% if verification_reference %}
+                        <div class="signature-block__reference">
+                            Ref: {{ verification_reference }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endif %}

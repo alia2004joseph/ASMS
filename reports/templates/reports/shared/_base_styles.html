@@ -1,0 +1,883 @@
+{% comment %}
+ASMS Professional Document Design System v1.0
+
+Shared print CSS for all Reports templates. The stylesheet is intentionally
+self-contained and uses only Django template variables supplied by the report
+template service / PDF exporter.
+
+Expected context:
+- branding.colors.primary / secondary / accent
+- branding.font_family / font_size_base
+- branding.watermark_text / watermark_image / background_image
+- page_config.page_size / orientation / margins
+- layout_config
+
+Designed for HTML preview and WeasyPrint PDF rendering.
+{% endcomment %}
+<style>
+    @page {
+        size: {{ page_config.page_size|default:"A4" }} {{ page_config.orientation|default:"portrait" }};
+        margin:
+            {{ page_config.margins.top|default:"22mm" }}
+            {{ page_config.margins.right|default:"16mm" }}
+            {{ page_config.margins.bottom|default:"23mm" }}
+            {{ page_config.margins.left|default:"16mm" }};
+
+        @bottom-left {
+            content: "ASMS • Official Document";
+            color: #7b8491;
+            font-family: {{ branding.font_family|default:"Arial, sans-serif" }};
+            font-size: 7.5pt;
+        }
+
+        @bottom-right {
+            content: "Page " counter(page) " of " counter(pages);
+            color: #7b8491;
+            font-family: {{ branding.font_family|default:"Arial, sans-serif" }};
+            font-size: 7.5pt;
+        }
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    html {
+        font-size: 100%;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+        color: #1b2430;
+        font-family: {{ branding.font_family|default:"'DejaVu Sans', Arial, sans-serif" }};
+        font-size: {{ branding.font_size_base|default:"10.5pt" }};
+        line-height: 1.48;
+        -weasy-font-feature-settings: "kern", "liga";
+        font-variant-numeric: tabular-nums;
+    }
+
+    h1, h2, h3, h4, h5, h6,
+    p, table, figure, blockquote {
+        margin-top: 0;
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .document-shell {
+        position: relative;
+        width: 100%;
+        min-height: 100%;
+    }
+
+    .document-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .security-frame {
+        position: fixed;
+        top: 5mm;
+        right: 5mm;
+        bottom: 5mm;
+        left: 5mm;
+        z-index: -3;
+        border: 0.45pt solid {{ branding.colors.primary|default:"#173b63" }};
+        pointer-events: none;
+    }
+
+    .security-frame::before {
+        content: "";
+        position: absolute;
+        top: 2.5mm;
+        right: 2.5mm;
+        bottom: 2.5mm;
+        left: 2.5mm;
+        border: 0.3pt solid #d8b45c;
+    }
+
+    .security-frame--subtle {
+        opacity: 0.42;
+    }
+
+    .microtext {
+        font-size: 5.6pt;
+        letter-spacing: 0.65pt;
+        text-transform: uppercase;
+        color: #8a929d;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .doc-header {
+        display: table;
+        width: 100%;
+        padding: 0 0 10pt;
+        margin: 0 0 13pt;
+        border-bottom: 1.8pt solid {{ branding.colors.primary|default:"#173b63" }};
+        page-break-inside: avoid;
+    }
+
+    .doc-header__logo,
+    .doc-header__identity,
+    .doc-header__reference {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .doc-header__logo {
+        width: 74pt;
+        padding-right: 12pt;
+    }
+
+    .doc-header img.logo,
+    .school-logo {
+        display: block;
+        width: auto;
+        max-width: 68pt;
+        height: 62pt;
+        object-fit: contain;
+    }
+
+    .doc-header__identity {
+        width: auto;
+    }
+
+    .doc-header__reference {
+        width: 128pt;
+        padding-left: 12pt;
+        text-align: right;
+        font-size: 7.8pt;
+        line-height: 1.42;
+        color: #5f6976;
+    }
+
+    .school-name,
+    .doc-header .school-name {
+        margin: 0;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-family: {{ branding.heading_font_family|default:branding.font_family|default:"'DejaVu Sans', Arial, sans-serif" }};
+        font-size: 17.5pt;
+        font-weight: 800;
+        line-height: 1.12;
+        letter-spacing: 0.15pt;
+    }
+
+    .school-motto {
+        margin-top: 3pt;
+        color: {{ branding.colors.accent|default:"#b68a28" }};
+        font-size: 8.2pt;
+        font-style: italic;
+        font-weight: 600;
+        letter-spacing: 0.2pt;
+    }
+
+    .letterhead-text,
+    .doc-header .letterhead-text {
+        margin-top: 3pt;
+        color: #5c6673;
+        font-size: 7.9pt;
+        line-height: 1.4;
+    }
+
+    .header-rule-accent {
+        width: 58pt;
+        height: 2.2pt;
+        margin-top: 7pt;
+        background: {{ branding.colors.accent|default:"#d3aa4d" }};
+    }
+
+    .doc-title-wrap {
+        margin: 0 0 16pt;
+        text-align: center;
+        page-break-inside: avoid;
+    }
+
+    .doc-kicker {
+        margin-bottom: 3pt;
+        color: #6e7885;
+        font-size: 7.5pt;
+        font-weight: 700;
+        letter-spacing: 1.4pt;
+        text-transform: uppercase;
+    }
+
+    .doc-title {
+        margin: 0;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-family: {{ branding.heading_font_family|default:branding.font_family|default:"'DejaVu Sans', Arial, sans-serif" }};
+        font-size: 17pt;
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: 0.8pt;
+        text-transform: uppercase;
+    }
+
+    .doc-subtitle {
+        max-width: 78%;
+        margin: 4pt auto 0;
+        color: #64707d;
+        font-size: 9pt;
+        line-height: 1.4;
+    }
+
+    .title-ornament {
+        width: 82pt;
+        height: 1.5pt;
+        margin: 7pt auto 0;
+        background: {{ branding.colors.accent|default:"#d3aa4d" }};
+    }
+
+    .section {
+        margin: 0 0 15pt;
+        page-break-inside: auto;
+    }
+
+    .section--compact {
+        margin-bottom: 9pt;
+    }
+
+    .section-heading {
+        display: table;
+        width: 100%;
+        margin: 0 0 7pt;
+        padding: 5.5pt 8pt;
+        border-left: 3pt solid {{ branding.colors.accent|default:"#d3aa4d" }};
+        background: #f4f7fa;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 10pt;
+        font-weight: 800;
+        letter-spacing: 0.3pt;
+        text-transform: uppercase;
+        page-break-after: avoid;
+    }
+
+    .section-heading--plain {
+        padding: 0 0 4pt;
+        border-left: 0;
+        border-bottom: 0.8pt solid #d7dde5;
+        background: transparent;
+    }
+
+    .section-caption {
+        margin: -3pt 0 7pt;
+        color: #6b7581;
+        font-size: 8pt;
+    }
+
+    .meta-grid {
+        display: table;
+        width: 100%;
+        margin: 0 0 13pt;
+        border-collapse: separate;
+        border-spacing: 6pt 6pt;
+        page-break-inside: avoid;
+    }
+
+    .meta-row {
+        display: table-row;
+    }
+
+    .meta-grid .field,
+    .meta-card {
+        display: table-cell;
+        width: 50%;
+        min-width: 0;
+        padding: 7pt 9pt;
+        vertical-align: top;
+        border: 0.55pt solid #dce2e9;
+        border-radius: 2pt;
+        background: #fbfcfd;
+    }
+
+    .meta-grid .label,
+    .meta-label {
+        display: block;
+        margin-bottom: 2pt;
+        color: #727d89;
+        font-size: 7.1pt;
+        font-weight: 700;
+        letter-spacing: 0.45pt;
+        text-transform: uppercase;
+    }
+
+    .meta-grid .value,
+    .meta-value {
+        display: block;
+        color: #1b2430;
+        font-size: 9.7pt;
+        font-weight: 700;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .meta-card--highlight {
+        border-color: {{ branding.colors.primary|default:"#173b63" }};
+        background: #f3f7fb;
+    }
+
+    .meta-card--full {
+        display: block;
+        width: 100%;
+    }
+
+    .info-strip {
+        display: table;
+        width: 100%;
+        margin-bottom: 12pt;
+        padding: 7pt 9pt;
+        border: 0.6pt solid #d8e0e8;
+        background: #f7f9fb;
+        page-break-inside: avoid;
+    }
+
+    .info-strip__item {
+        display: table-cell;
+        padding: 0 8pt;
+        border-right: 0.5pt solid #d9e0e7;
+        text-align: center;
+    }
+
+    .info-strip__item:first-child {
+        padding-left: 0;
+    }
+
+    .info-strip__item:last-child {
+        padding-right: 0;
+        border-right: 0;
+    }
+
+    .info-strip__label {
+        display: block;
+        color: #77818d;
+        font-size: 6.8pt;
+        font-weight: 700;
+        letter-spacing: 0.35pt;
+        text-transform: uppercase;
+    }
+
+    .info-strip__value {
+        display: block;
+        margin-top: 1.5pt;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 10pt;
+        font-weight: 800;
+    }
+
+    table.data-table,
+    .data-table {
+        width: 100%;
+        margin: 0 0 13pt;
+        border-collapse: collapse;
+        border-spacing: 0;
+        page-break-inside: auto;
+    }
+
+    table.data-table thead {
+        display: table-header-group;
+    }
+
+    table.data-table tfoot {
+        display: table-footer-group;
+    }
+
+    table.data-table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    table.data-table th,
+    table.data-table td {
+        padding: 6.2pt 6.5pt;
+        border: 0.55pt solid #d4dae2;
+        vertical-align: middle;
+        font-size: 8.5pt;
+        line-height: 1.32;
+    }
+
+    table.data-table th {
+        background: {{ branding.colors.primary|default:"#173b63" }};
+        color: #ffffff;
+        font-size: 7.5pt;
+        font-weight: 800;
+        letter-spacing: 0.35pt;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    table.data-table tbody tr:nth-child(even) td {
+        background: #f7f9fb;
+    }
+
+    table.data-table tbody tr:last-child td {
+        border-bottom-color: #bec7d1;
+    }
+
+    table.data-table .numeric,
+    table.data-table .center {
+        text-align: center;
+    }
+
+    table.data-table .right {
+        text-align: right;
+    }
+
+    table.data-table .strong {
+        font-weight: 800;
+    }
+
+    table.data-table .muted {
+        color: #697481;
+    }
+
+    table.data-table .total-row td {
+        border-top: 1.2pt solid {{ branding.colors.primary|default:"#173b63" }};
+        background: #edf3f8;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-weight: 800;
+    }
+
+    table.data-table--compact th,
+    table.data-table--compact td {
+        padding: 4.6pt 5pt;
+        font-size: 7.8pt;
+    }
+
+    table.data-table--borderless th,
+    table.data-table--borderless td {
+        border-right: 0;
+        border-left: 0;
+    }
+
+    .status-badge {
+        display: inline-block;
+        min-width: 54pt;
+        padding: 2.5pt 6pt;
+        border: 0.5pt solid #c8d0da;
+        border-radius: 8pt;
+        background: #f5f7f9;
+        color: #485361;
+        font-size: 6.9pt;
+        font-weight: 800;
+        letter-spacing: 0.3pt;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    .status-badge--success {
+        border-color: #9bc9a5;
+        background: #edf8ef;
+        color: #276438;
+    }
+
+    .status-badge--warning {
+        border-color: #e2c688;
+        background: #fff8e8;
+        color: #805d13;
+    }
+
+    .status-badge--danger {
+        border-color: #ddb1b1;
+        background: #fff0f0;
+        color: #8a2f2f;
+    }
+
+    .summary-grid {
+        display: table;
+        width: 100%;
+        margin: 0 0 13pt;
+        border-spacing: 6pt 0;
+        page-break-inside: avoid;
+    }
+
+    .summary-card {
+        display: table-cell;
+        width: 25%;
+        padding: 8pt;
+        border: 0.6pt solid #d8dfe7;
+        border-top: 2.2pt solid {{ branding.colors.accent|default:"#d3aa4d" }};
+        background: #fbfcfd;
+        text-align: center;
+        vertical-align: top;
+    }
+
+    .summary-card__label {
+        color: #737e8a;
+        font-size: 6.8pt;
+        font-weight: 700;
+        letter-spacing: 0.35pt;
+        text-transform: uppercase;
+    }
+
+    .summary-card__value {
+        margin-top: 3pt;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 14pt;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .summary-card__note {
+        margin-top: 2pt;
+        color: #78828d;
+        font-size: 6.8pt;
+    }
+
+    .callout {
+        margin: 0 0 12pt;
+        padding: 8pt 10pt;
+        border: 0.6pt solid #d8e0e8;
+        border-left: 3pt solid {{ branding.colors.primary|default:"#173b63" }};
+        background: #f7f9fb;
+        page-break-inside: avoid;
+    }
+
+    .callout__title {
+        margin-bottom: 2pt;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 8.2pt;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .callout__body {
+        color: #4e5966;
+        font-size: 8.4pt;
+    }
+
+    .callout--success {
+        border-left-color: #3c8250;
+        background: #f1f8f3;
+    }
+
+    .callout--warning {
+        border-left-color: #b98520;
+        background: #fff9ed;
+    }
+
+    .callout--danger {
+        border-left-color: #a43d3d;
+        background: #fff3f3;
+    }
+
+    .signature-grid {
+        display: table;
+        width: 100%;
+        margin-top: 20pt;
+        border-spacing: 12pt 0;
+        page-break-inside: avoid;
+    }
+
+    .signature-card {
+        display: table-cell;
+        width: 50%;
+        padding: 0 6pt;
+        text-align: center;
+        vertical-align: bottom;
+    }
+
+    .signature-card__image {
+        display: block;
+        width: auto;
+        max-width: 104pt;
+        height: 38pt;
+        margin: 0 auto 3pt;
+        object-fit: contain;
+    }
+
+    .signature-card__line {
+        width: 88%;
+        margin: 0 auto 4pt;
+        border-top: 0.7pt solid #59636f;
+    }
+
+    .signature-card__name {
+        color: #202a35;
+        font-size: 8.6pt;
+        font-weight: 800;
+    }
+
+    .signature-card__title {
+        margin-top: 1pt;
+        color: #697481;
+        font-size: 7.2pt;
+    }
+
+    .signature-card__verification {
+        margin-top: 2pt;
+        color: #3f7250;
+        font-size: 6.5pt;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .verification-panel {
+        display: table;
+        width: 100%;
+        margin-top: 14pt;
+        padding: 8pt;
+        border: 0.7pt solid #ccd5df;
+        background: #f8fafc;
+        page-break-inside: avoid;
+    }
+
+    .verification-panel__qr,
+    .verification-panel__content,
+    .verification-panel__stamp {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .verification-panel__qr {
+        width: 62pt;
+    }
+
+    .verification-panel__qr img,
+    .qr-image {
+        display: block;
+        width: 54pt;
+        height: 54pt;
+        object-fit: contain;
+    }
+
+    .verification-panel__content {
+        padding: 0 10pt;
+    }
+
+    .verification-panel__title {
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 8pt;
+        font-weight: 800;
+        letter-spacing: 0.25pt;
+        text-transform: uppercase;
+    }
+
+    .verification-panel__text {
+        margin-top: 2pt;
+        color: #5d6875;
+        font-size: 7.2pt;
+        line-height: 1.42;
+    }
+
+    .verification-code {
+        display: inline-block;
+        margin-top: 4pt;
+        padding: 2.5pt 5pt;
+        border: 0.5pt solid #cfd7e0;
+        background: #ffffff;
+        color: #263342;
+        font-family: "DejaVu Sans Mono", monospace;
+        font-size: 7.4pt;
+        font-weight: 700;
+        letter-spacing: 0.35pt;
+    }
+
+    .verification-panel__stamp {
+        width: 76pt;
+        text-align: center;
+    }
+
+    .verification-panel__stamp img,
+    .stamp-image {
+        width: auto;
+        max-width: 68pt;
+        height: 54pt;
+        object-fit: contain;
+        opacity: 0.92;
+    }
+
+    .watermark {
+        position: fixed;
+        top: 41%;
+        left: 8%;
+        width: 84%;
+        z-index: -2;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 52pt;
+        font-weight: 800;
+        letter-spacing: 4pt;
+        line-height: 1;
+        text-align: center;
+        text-transform: uppercase;
+        opacity: 0.045;
+        transform: rotate(-31deg);
+        transform-origin: center;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .watermark-image {
+        position: fixed;
+        top: 27%;
+        left: 22%;
+        width: 56%;
+        height: 46%;
+        z-index: -2;
+        object-fit: contain;
+        opacity: 0.035;
+        pointer-events: none;
+    }
+
+    .background-artwork {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: -4;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.12;
+        pointer-events: none;
+    }
+
+    .doc-footer {
+        margin-top: 14pt;
+        padding-top: 6pt;
+        border-top: 0.55pt solid #d4dbe3;
+        color: #7b8591;
+        font-size: 6.8pt;
+        line-height: 1.45;
+        text-align: center;
+        page-break-inside: avoid;
+    }
+
+    .doc-footer__primary {
+        color: #5f6975;
+        font-weight: 700;
+    }
+
+    .doc-footer__security {
+        margin-top: 2pt;
+        font-size: 5.8pt;
+        letter-spacing: 0.25pt;
+        text-transform: uppercase;
+    }
+
+    .official-seal {
+        display: inline-block;
+        padding: 2pt 5pt;
+        border: 0.6pt solid {{ branding.colors.accent|default:"#d3aa4d" }};
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 6.5pt;
+        font-weight: 800;
+        letter-spacing: 0.5pt;
+        text-transform: uppercase;
+    }
+
+    .text-primary { color: {{ branding.colors.primary|default:"#173b63" }}; }
+    .text-accent { color: {{ branding.colors.accent|default:"#b68a28" }}; }
+    .text-muted { color: #6d7884; }
+    .text-success { color: #2f7142; }
+    .text-danger { color: #913a3a; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+    .font-bold { font-weight: 800; }
+    .font-semibold { font-weight: 700; }
+    .uppercase { text-transform: uppercase; }
+    .nowrap { white-space: nowrap; }
+
+    .mt-0 { margin-top: 0; }
+    .mt-1 { margin-top: 4pt; }
+    .mt-2 { margin-top: 8pt; }
+    .mt-3 { margin-top: 12pt; }
+    .mt-4 { margin-top: 16pt; }
+    .mb-0 { margin-bottom: 0; }
+    .mb-1 { margin-bottom: 4pt; }
+    .mb-2 { margin-bottom: 8pt; }
+    .mb-3 { margin-bottom: 12pt; }
+    .mb-4 { margin-bottom: 16pt; }
+
+    .avoid-break,
+    .keep-together {
+        page-break-inside: avoid;
+    }
+
+    .break-before {
+        page-break-before: always;
+    }
+
+    .break-after {
+        page-break-after: always;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .empty-state {
+        padding: 20pt 12pt;
+        border: 0.7pt dashed #cdd5de;
+        background: #fafbfc;
+        color: #77818d;
+        font-size: 8.5pt;
+        text-align: center;
+    }
+
+    .legal-note {
+        margin-top: 10pt;
+        padding: 6pt 8pt;
+        border-top: 0.5pt solid #d9dfe6;
+        color: #6e7884;
+        font-size: 6.8pt;
+        line-height: 1.45;
+    }
+
+    @media screen {
+        body {
+            max-width: 210mm;
+            min-height: 297mm;
+            margin: 18px auto;
+            padding: 18mm 16mm;
+            background: #ffffff;
+            box-shadow: 0 8px 32px rgba(22, 34, 48, 0.13);
+        }
+
+        html {
+            background: #e9edf2;
+        }
+    }
+
+    @media print {
+        html,
+        body {
+            background: #ffffff !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            box-shadow: none;
+        }
+    }
+</style>
+
+{% if branding.background_image %}
+<img
+    class="background-artwork"
+    src="{{ branding.background_image }}"
+    alt=""
+>
+{% endif %}
+
+{% if branding.watermark_image %}
+<img
+    class="watermark-image"
+    src="{{ branding.watermark_image }}"
+    alt=""
+>
+{% elif branding.watermark_text %}
+<div class="watermark" aria-hidden="true">
+    {{ branding.watermark_text }}
+</div>
+{% endif %}

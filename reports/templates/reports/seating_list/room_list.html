@@ -1,0 +1,165 @@
+{% comment %}
+Professional Examination Room List template for ASMS.
+
+Expected context:
+- room
+- exam_date
+- start_time
+- end_time
+- capacity
+- rows (seat, student_number, student_name, subject_or_paper, status)
+- examination_session (optional)
+- chief_invigilator (optional)
+- assistant_invigilator (optional)
+- created_at
+- branding
+
+Backward compatible with the original template.
+{% endcomment %}
+
+{% include "reports/shared/_base_styles.html" %}
+
+{% with document_title="Examination Room List" %}
+    {% include "reports/shared/_header_letterhead.html" %}
+{% endwith %}
+
+<main class="document-body seating-list-document">
+
+<section class="document-status-bar">
+    <div>
+        <span class="status-badge status-badge--info">
+            Examination Seating Register
+        </span>
+    </div>
+</section>
+
+<section class="section-card">
+    <div class="section-heading">
+        <div>
+            <div class="section-heading__eyebrow">Examination Venue</div>
+            <h2 class="section-heading__title">Room Information</h2>
+        </div>
+    </div>
+
+    <div class="meta-grid">
+        <div class="field">
+            <span class="label">Room</span>
+            <span class="value">{{ room|default:"—" }}</span>
+        </div>
+
+        <div class="field">
+            <span class="label">Exam Date</span>
+            <span class="value">{{ exam_date|default:"—" }}</span>
+        </div>
+
+        <div class="field">
+            <span class="label">Time</span>
+            <span class="value">{{ start_time|default:"—" }} – {{ end_time|default:"—" }}</span>
+        </div>
+
+        <div class="field">
+            <span class="label">Capacity</span>
+            <span class="value">{{ capacity|default:"—" }}</span>
+        </div>
+
+        {% if examination_session %}
+        <div class="field">
+            <span class="label">Session</span>
+            <span class="value">{{ examination_session }}</span>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section-card">
+    <div class="section-heading">
+        <div>
+            <div class="section-heading__eyebrow">Candidate Allocation</div>
+            <h2 class="section-heading__title">Seating Register</h2>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Seat</th>
+                    <th>Student No.</th>
+                    <th>Student Name</th>
+                    <th>Subject / Paper</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for row in rows %}
+                <tr>
+                    <td class="text-center">{{ row.0 }}</td>
+                    <td class="value--mono">{{ row.1 }}</td>
+                    <td><strong>{{ row.2 }}</strong></td>
+                    <td>{{ row.3 }}</td>
+                    <td>{{ row.4 }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        No seat assignments have been recorded for this examination room.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<aside class="document-notice document-notice--neutral">
+    <div class="document-notice__icon">✓</div>
+    <div>
+        <div class="document-notice__title">Invigilator Instructions</div>
+        <div class="document-notice__text">
+            Verify each candidate's identity before admission and ensure candidates occupy only their allocated seats.
+        </div>
+    </div>
+</aside>
+
+<section class="section-card avoid-break">
+    <div class="section-heading section-heading--compact">
+        <div>
+            <div class="section-heading__eyebrow">Examination Officials</div>
+            <h2 class="section-heading__title">Attendance Confirmation</h2>
+        </div>
+    </div>
+
+    <div class="meta-grid">
+        <div class="field">
+            <span class="label">Chief Invigilator</span>
+            <span class="value">
+                {% if chief_invigilator %}
+                    {{ chief_invigilator }}
+                {% else %}
+                    ________________________________
+                {% endif %}
+            </span>
+        </div>
+
+        {% if assistant_invigilator %}
+        <div class="field">
+            <span class="label">Assistant Invigilator</span>
+            <span class="value">{{ assistant_invigilator }}</span>
+        </div>
+        {% endif %}
+
+        <div class="field">
+            <span class="label">Signature</span>
+            <span class="value">_______________________________</span>
+        </div>
+
+        <div class="field">
+            <span class="label">Date</span>
+            <span class="value">_______________________________</span>
+        </div>
+    </div>
+</section>
+
+</main>
+
+{% include "reports/shared/_footer.html" %}

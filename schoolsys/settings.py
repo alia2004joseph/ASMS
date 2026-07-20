@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-AUTH_USER_MODEL ="accounts.User"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "attendance",
     "timetable",
     "finance",
+    "reports",
 
     
 ]
@@ -104,7 +105,7 @@ ROOT_URLCONF = "schoolsys.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": ["templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -178,3 +179,19 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",]
+
+REPORTS_FINANCE_BALANCE_PROVIDER = (
+    "finance.services.payment_service.PaymentService.get_balance_summary"
+)
+REPORTS_PERFORMANCE_PROVIDER = (
+    "academics.services.performance_service.get_student_performance"
+)
+REPORTS_USER_ROLE_ATTRIBUTE = "role"
+REPORTS_RESULT_SLIP_PROVIDER = (
+        "academics.services.grading_service."
+        "GradingService.get_term_subject_results"
+    )
+REPORTS_TRANSCRIPT_PROVIDER = (
+    "academics.services.transcript_service."
+    "TranscriptService.get_transcript_results"
+)

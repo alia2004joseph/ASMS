@@ -1,0 +1,214 @@
+{% comment %}
+Professional Fee Clearance Certificate template for ASMS.
+
+Expected context:
+- student_name
+- student_number
+- academic_year
+- term
+- certificate_number
+- issued_at
+- cleared_amount
+- outstanding_balance
+- clearance_status
+- override_reason (optional)
+- classroom (optional)
+- programme_name (optional)
+- currency_code (optional)
+- document_number (optional; falls back to certificate_number)
+- branding
+- created_at
+- signature/stamp/QR context used by shared components
+
+The template remains backward compatible with the original minimum context.
+{% endcomment %}
+
+{% include "reports/shared/_base_styles.html" %}
+
+{% with document_title="Fee Clearance Certificate" %}
+    {% include "reports/shared/_header_letterhead.html" %}
+{% endwith %}
+
+<main class="document-body fee-clearance-document">
+    <section class="document-status-bar">
+        <div>
+            <span class="status-badge {% if clearance_status == 'Cleared' or clearance_status == 'CLEAR' or clearance_status == 'clear' %}status-badge--success{% else %}status-badge--warning{% endif %}">
+                {{ clearance_status|default:"Clearance Pending" }}
+            </span>
+        </div>
+
+        <div class="document-reference">
+            <span class="document-reference__label">Certificate No.</span>
+            <span class="document-reference__value">
+                {{ document_number|default:certificate_number|default:"—" }}
+            </span>
+        </div>
+    </section>
+
+    <section class="section-card fee-clearance-student-profile">
+        <div class="section-heading">
+            <div>
+                <div class="section-heading__eyebrow">Account Holder</div>
+                <h2 class="section-heading__title">Student and Period Details</h2>
+            </div>
+        </div>
+
+        <div class="meta-grid">
+            <div class="field">
+                <span class="label">Student Name</span>
+                <span class="value">{{ student_name|default:"—" }}</span>
+            </div>
+
+            <div class="field">
+                <span class="label">Student Number</span>
+                <span class="value value--mono">{{ student_number|default:"—" }}</span>
+            </div>
+
+            {% if classroom %}
+                <div class="field">
+                    <span class="label">Class</span>
+                    <span class="value">{{ classroom }}</span>
+                </div>
+            {% endif %}
+
+            {% if programme_name %}
+                <div class="field">
+                    <span class="label">Programme</span>
+                    <span class="value">{{ programme_name }}</span>
+                </div>
+            {% endif %}
+
+            <div class="field">
+                <span class="label">Academic Year</span>
+                <span class="value">{{ academic_year|default:"—" }}</span>
+            </div>
+
+            <div class="field">
+                <span class="label">Term</span>
+                <span class="value">{{ term|default:"—" }}</span>
+            </div>
+
+            <div class="field">
+                <span class="label">Issue Date</span>
+                <span class="value">{{ issued_at|default:"—" }}</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="summary-grid fee-clearance-summary">
+        <div class="summary-card">
+            <div class="summary-card__label">Amount Cleared</div>
+            <div class="summary-card__value">
+                {% if currency_code %}{{ currency_code }} {% endif %}{{ cleared_amount|default:"0" }}
+            </div>
+            <div class="summary-card__caption">Total amount paid and recognised</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-card__label">Outstanding Balance</div>
+            <div class="summary-card__value">
+                {% if currency_code %}{{ currency_code }} {% endif %}{{ outstanding_balance|default:"0" }}
+            </div>
+            <div class="summary-card__caption">Balance remaining as of the issue date</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-card__label">Clearance Status</div>
+            <div class="summary-card__value">{{ clearance_status|default:"Pending" }}</div>
+            <div class="summary-card__caption">Current account clearance position</div>
+        </div>
+    </section>
+
+    <section class="section-card fee-clearance-account-review">
+        <div class="section-heading">
+            <div>
+                <div class="section-heading__eyebrow">Financial Review</div>
+                <h2 class="section-heading__title">Fee Account Summary</h2>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table fee-clearance-table">
+                <tbody>
+                    <tr>
+                        <th scope="row">Amount Cleared (Paid)</th>
+                        <td class="text-right">
+                            {% if currency_code %}{{ currency_code }} {% endif %}{{ cleared_amount|default:"0" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Outstanding Balance</th>
+                        <td class="text-right">
+                            {% if currency_code %}{{ currency_code }} {% endif %}{{ outstanding_balance|default:"0" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Clearance Status</th>
+                        <td>
+                            <span class="status-badge {% if clearance_status == 'Cleared' or clearance_status == 'CLEAR' or clearance_status == 'clear' %}status-badge--success{% else %}status-badge--warning{% endif %}">
+                                {{ clearance_status|default:"Pending" }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% if override_reason %}
+                        <tr>
+                            <th scope="row">Override Reason</th>
+                            <td>{{ override_reason }}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="certificate-statement avoid-break">
+        <div class="certificate-statement__eyebrow">Official Certification</div>
+        <p class="certificate-statement__text">
+            This is to certify that the fee account of
+            <strong>{{ student_name|default:"the above-named student" }}</strong>,
+            student number <strong>{{ student_number|default:"—" }}</strong>,
+            has been reviewed for <strong>{{ term|default:"the stated term" }}</strong>
+            of <strong>{{ academic_year|default:"the stated academic year" }}</strong>
+            and is recorded as <strong>{{ clearance_status|default:"pending review" }}</strong>
+            as of <strong>{{ issued_at|default:"the issue date shown above" }}</strong>.
+        </p>
+
+        {% if override_reason %}
+            <div class="document-notice document-notice--warning">
+                <div class="document-notice__icon">!</div>
+                <div>
+                    <div class="document-notice__title">Administrative Override Applied</div>
+                    <div class="document-notice__text">{{ override_reason }}</div>
+                </div>
+            </div>
+        {% endif %}
+    </section>
+
+    <aside class="document-notice document-notice--neutral">
+        <div class="document-notice__icon">✓</div>
+        <div>
+            <div class="document-notice__title">Verification Required</div>
+            <div class="document-notice__text">
+                This certificate is valid only when its details match the institution's finance records. Use the QR code or verification reference below to confirm authenticity.
+            </div>
+        </div>
+    </aside>
+
+    <section class="transcript-certification avoid-break">
+        <div class="transcript-certification__signing-area">
+            <div class="transcript-certification__stamp">
+                {% include "reports/shared/_stamp_block.html" %}
+            </div>
+
+            <div class="transcript-certification__signature">
+                {% include "reports/shared/_signature_block.html" %}
+            </div>
+        </div>
+
+        <div class="transcript-certification__verification">
+            {% include "reports/shared/_qr_block.html" %}
+        </div>
+    </section>
+</main>
+
+{% include "reports/shared/_footer.html" %}

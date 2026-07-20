@@ -1,0 +1,62 @@
+{% comment %}
+Professional QR verification block for ASMS-generated documents.
+
+Expected context:
+- qr_code_base64
+- verification_code
+- document_number
+- verification_url (optional)
+- qr_caption (optional)
+- verification_label (optional)
+
+Behaviour:
+- Renders nothing when no QR code is available.
+- Embeds the QR code directly using a base64 PNG data URI.
+- Keeps all optional metadata graceful and print-safe.
+{% endcomment %}
+
+{% if qr_code_base64 %}
+    <aside class="qr-block" aria-label="Document verification">
+        <div class="qr-block__frame">
+            <img
+                class="qr-block__image"
+                src="data:image/png;base64,{{ qr_code_base64 }}"
+                alt="QR code for document verification"
+            >
+        </div>
+
+        <div class="qr-block__content">
+            <div class="qr-block__heading">
+                {{ qr_caption|default:"Verify this document" }}
+            </div>
+
+            {% if document_number %}
+                <div class="qr-block__document-number">
+                    <span class="qr-block__label">Document No.</span>
+                    <span class="qr-block__value">{{ document_number }}</span>
+                </div>
+            {% endif %}
+
+            {% if verification_code %}
+                <div class="qr-block__verification-code">
+                    <span class="qr-block__label">
+                        {{ verification_label|default:"Verification code" }}
+                    </span>
+                    <span class="qr-block__value qr-block__value--code">
+                        {{ verification_code }}
+                    </span>
+                </div>
+            {% endif %}
+
+            {% if verification_url %}
+                <div class="qr-block__url">
+                    {{ verification_url }}
+                </div>
+            {% endif %}
+
+            <div class="qr-block__instruction">
+                Scan the QR code or use the verification details above to confirm authenticity.
+            </div>
+        </div>
+    </aside>
+{% endif %}

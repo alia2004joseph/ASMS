@@ -1,0 +1,210 @@
+{% comment %}
+Professional transcript template for ASMS.
+
+Expected context:
+- is_official
+- student_name
+- student_number
+- cumulative_gpa
+- credits_earned_total
+- gpa_snapshots
+- document_title (optional; header can use this when supplied)
+- document_subtitle (optional)
+- academic_period (optional)
+- programme_name (optional)
+- school_or_faculty_name (optional)
+- admission_year (optional)
+- graduation_status (optional)
+- created_at
+- branding
+- signature/stamp/QR context used by shared components
+
+The template remains compatible with the original minimum context.
+{% endcomment %}
+
+{% include "reports/shared/_base_styles.html" %}
+
+{% with document_title="Academic Transcript" %}
+    {% include "reports/shared/_header_letterhead.html" %}
+{% endwith %}
+
+<main class="document-body transcript-document">
+    <section class="document-status-bar">
+        <div>
+            <span class="status-badge {% if is_official %}status-badge--success{% else %}status-badge--warning{% endif %}">
+                {% if is_official %}Official Transcript{% else %}Unofficial Transcript{% endif %}
+            </span>
+        </div>
+
+        {% if document_number %}
+            <div class="document-reference">
+                <span class="document-reference__label">Document No.</span>
+                <span class="document-reference__value">{{ document_number }}</span>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="section-card transcript-student-profile">
+        <div class="section-heading">
+            <div>
+                <div class="section-heading__eyebrow">Student Record</div>
+                <h2 class="section-heading__title">Academic Identity</h2>
+            </div>
+        </div>
+
+        <div class="meta-grid">
+            <div class="field">
+                <span class="label">Student Name</span>
+                <span class="value">{{ student_name|default:"—" }}</span>
+            </div>
+
+            <div class="field">
+                <span class="label">Student Number</span>
+                <span class="value value--mono">{{ student_number|default:"—" }}</span>
+            </div>
+
+            {% if programme_name %}
+                <div class="field">
+                    <span class="label">Programme</span>
+                    <span class="value">{{ programme_name }}</span>
+                </div>
+            {% endif %}
+
+            {% if school_or_faculty_name %}
+                <div class="field">
+                    <span class="label">School / Faculty</span>
+                    <span class="value">{{ school_or_faculty_name }}</span>
+                </div>
+            {% endif %}
+
+            {% if admission_year %}
+                <div class="field">
+                    <span class="label">Admission Year</span>
+                    <span class="value">{{ admission_year }}</span>
+                </div>
+            {% endif %}
+
+            {% if graduation_status %}
+                <div class="field">
+                    <span class="label">Academic Status</span>
+                    <span class="value">{{ graduation_status }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="summary-grid transcript-summary">
+        <div class="summary-card">
+            <div class="summary-card__label">Cumulative GPA</div>
+            <div class="summary-card__value">{{ cumulative_gpa|default:"—" }}</div>
+            <div class="summary-card__caption">Overall academic performance</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-card__label">Credits Earned</div>
+            <div class="summary-card__value">{{ credits_earned_total|default:"0" }}</div>
+            <div class="summary-card__caption">Total successfully completed credits</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-card__label">Recorded Terms</div>
+            <div class="summary-card__value">{{ gpa_snapshots|length }}</div>
+            <div class="summary-card__caption">Terms included in this transcript</div>
+        </div>
+    </section>
+
+    <section class="section-card transcript-history">
+        <div class="section-heading">
+            <div>
+                <div class="section-heading__eyebrow">Academic Performance</div>
+                <h2 class="section-heading__title">Term-by-Term GPA Summary</h2>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table transcript-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Term</th>
+                        <th scope="col" class="text-center">Term GPA</th>
+                        <th scope="col" class="text-center">Cumulative GPA</th>
+                        <th scope="col" class="text-center">Credits Earned</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for snapshot in gpa_snapshots %}
+                        <tr>
+                            <td>
+                                <strong>{{ snapshot.term }}</strong>
+                            </td>
+                            <td class="text-center">{{ snapshot.term_gpa|default:"—" }}</td>
+                            <td class="text-center">{{ snapshot.cumulative_gpa|default:"—" }}</td>
+                            <td class="text-center">{{ snapshot.credits_earned|default:"0" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                No academic term records are available for this student.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    {% if not is_official %}
+        <aside class="document-notice document-notice--warning">
+            <div class="document-notice__icon">!</div>
+            <div>
+                <div class="document-notice__title">Unofficial Copy</div>
+                <div class="document-notice__text">
+                    This transcript is provided for informational purposes only and must not be treated as an officially certified academic record.
+                </div>
+            </div>
+        </aside>
+    {% else %}
+        <aside class="document-notice document-notice--neutral">
+            <div class="document-notice__icon">✓</div>
+            <div>
+                <div class="document-notice__title">Official Academic Record</div>
+                <div class="document-notice__text">
+                    This transcript is issued from the institution’s academic records system and should be verified using the QR code or verification reference shown below.
+                </div>
+            </div>
+        </aside>
+    {% endif %}
+
+    <section class="transcript-certification avoid-break">
+        <div class="transcript-certification__signing-area">
+            <div class="transcript-certification__stamp">
+                {% include "reports/shared/_stamp_block.html" %}
+            </div>
+
+            <div class="transcript-certification__signature">
+                {% include "reports/shared/_signature_block.html" %}
+            </div>
+        </div>
+
+        <div class="transcript-certification__verification">
+            {% include "reports/shared/_qr_block.html" %}
+        </div>
+    </section>
+
+    {% if grading_scale %}
+        <section class="section-card transcript-grading-scale avoid-break">
+            <div class="section-heading section-heading--compact">
+                <div>
+                    <div class="section-heading__eyebrow">Reference</div>
+                    <h2 class="section-heading__title">Grading Scale</h2>
+                </div>
+            </div>
+
+            <div class="grading-scale">
+                {{ grading_scale|safe }}
+            </div>
+        </section>
+    {% endif %}
+</main>
+
+{% include "reports/shared/_footer.html" %}

@@ -1168,7 +1168,7 @@ class FinancialTransaction(models.Model):
     class Meta:
         verbose_name = "Financial Transaction"
         verbose_name_plural = "Financial Transactions"
-        ordering = ["-created_at"]
+        ordering = ["-created_at", "-pk"]
         indexes = [
             models.Index(fields=["school", "transaction_type"]),
             models.Index(fields=["school", "created_at"]),

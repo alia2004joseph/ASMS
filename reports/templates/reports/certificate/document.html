@@ -1,0 +1,93 @@
+{% comment %}
+Professional Certificate template for ASMS.
+Backward compatible with original context.
+{% endcomment %}
+
+{% include "reports/shared/_base_styles.html" %}
+
+{% with document_title=certificate_type_display|default:"Certificate" %}
+    {% include "reports/shared/_header_letterhead.html" %}
+{% endwith %}
+
+<main class="document-body certificate-document">
+
+<section class="certificate-frame">
+
+    <div class="certificate-frame__border">
+
+        <div class="certificate-header">
+            <div class="certificate-header__subtitle">
+                This certifies that
+            </div>
+
+            <h1 class="certificate-title">
+                {{ certificate_type_display|default:"Certificate" }}
+            </h1>
+        </div>
+
+        <div class="certificate-recipient">
+            <div class="certificate-recipient__label">
+                is proudly presented to
+            </div>
+
+            <div class="certificate-recipient__name">
+                {{ student_name }}
+            </div>
+
+            <div class="certificate-recipient__citation">
+                {{ citation_text|default:"In recognition of outstanding achievement and the successful fulfilment of the institution's academic requirements." }}
+            </div>
+        </div>
+
+        <section class="summary-grid certificate-summary">
+            <div class="summary-card">
+                <div class="summary-card__label">Certificate No.</div>
+                <div class="summary-card__value">{{ serial_number|default:"—" }}</div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-card__label">Issue Date</div>
+                <div class="summary-card__value">{{ issued_at|default:"—" }}</div>
+            </div>
+
+            {% if student_number %}
+            <div class="summary-card">
+                <div class="summary-card__label">Student Number</div>
+                <div class="summary-card__value value--mono">{{ student_number }}</div>
+            </div>
+            {% endif %}
+        </section>
+
+        <aside class="document-notice document-notice--neutral">
+            <div class="document-notice__icon">✓</div>
+            <div>
+                <div class="document-notice__title">Official Institutional Certificate</div>
+                <div class="document-notice__text">
+                    This certificate is an official document of {{ school_name }} and may be verified using the QR code or verification reference.
+                </div>
+            </div>
+        </aside>
+
+        <section class="transcript-certification avoid-break">
+            <div class="transcript-certification__signing-area">
+                <div class="transcript-certification__stamp">
+                    {% include "reports/shared/_stamp_block.html" %}
+                </div>
+
+                <div class="transcript-certification__signature">
+                    {% include "reports/shared/_signature_block.html" %}
+                </div>
+            </div>
+
+            <div class="transcript-certification__verification">
+                {% include "reports/shared/_qr_block.html" %}
+            </div>
+        </section>
+
+    </div>
+
+</section>
+
+</main>
+
+{% include "reports/shared/_footer.html" %}

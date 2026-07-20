@@ -184,7 +184,7 @@ class Grade(models.Model):
                 name="uniq_grade_enrollment_assessment",
             )
         ]
-        ordering = ["-created_at"]
+        ordering = ["-created_at", "-pk"]
 
     def __str__(self):
         return (
@@ -362,7 +362,7 @@ class SubjectGradeApproval(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["-created_at", "-pk"]
 
     def __str__(self):
         return f"Approval for {self.classroom_subject} - {self.status}"

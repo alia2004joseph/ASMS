@@ -1,0 +1,199 @@
+{% comment %}
+Professional Examination Permit template for ASMS.
+
+Expected context:
+- student_photo (optional)
+- student_name
+- student_number
+- programme
+- classroom
+- academic_year
+- term
+- permit_number
+- issue_date
+- registered_subjects
+- examination_session (optional)
+- examination_center (optional)
+- seat_number (optional)
+- candidate_status (optional)
+- branding
+- created_at
+- signature/stamp/QR context used by shared components
+
+The template remains backward compatible with the original minimum context.
+{% endcomment %}
+
+{% include "reports/shared/_base_styles.html" %}
+
+{% with document_title="Examination Permit" %}
+    {% include "reports/shared/_header_letterhead.html" %}
+{% endwith %}
+
+<main class="document-body permit-document">
+    <section class="document-status-bar">
+        <div>
+            <span class="status-badge status-badge--info">
+                Authorized Examination Entry
+            </span>
+        </div>
+
+        <div class="document-reference">
+            <span class="document-reference__label">Permit No.</span>
+            <span class="document-reference__value">{{ permit_number|default:"—" }}</span>
+        </div>
+    </section>
+
+    <section class="section-card permit-candidate-profile">
+        <div class="section-heading">
+            <div>
+                <div class="section-heading__eyebrow">Candidate Information</div>
+                <h2 class="section-heading__title">Student and Examination Details</h2>
+            </div>
+        </div>
+
+        <div class="permit-profile-layout">
+            <div class="permit-photo-column">
+                {% if student_photo %}
+                    <img
+                        class="permit-photo"
+                        src="{{ student_photo.url|default:student_photo }}"
+                        alt="Passport photograph of {{ student_name|default:'student' }}"
+                    >
+                {% else %}
+                    <div class="permit-photo permit-photo--placeholder">
+                        <span>No Photo</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="permit-profile-details">
+                <div class="meta-grid">
+                    <div class="field">
+                        <span class="label">Student Name</span>
+                        <span class="value">{{ student_name|default:"—" }}</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="label">Student Number</span>
+                        <span class="value value--mono">{{ student_number|default:"—" }}</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="label">Programme</span>
+                        <span class="value">{{ programme|default:"—" }}</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="label">Classroom</span>
+                        <span class="value">{{ classroom|default:"—" }}</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="label">Academic Year</span>
+                        <span class="value">{{ academic_year|default:"—" }}</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="label">Term</span>
+                        <span class="value">{{ term|default:"—" }}</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="label">Issue Date</span>
+                        <span class="value">{{ issue_date|default:"—" }}</span>
+                    </div>
+
+                    {% if examination_session %}
+                        <div class="field">
+                            <span class="label">Examination Session</span>
+                            <span class="value">{{ examination_session }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if examination_center %}
+                        <div class="field">
+                            <span class="label">Examination Centre</span>
+                            <span class="value">{{ examination_center }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if seat_number %}
+                        <div class="field">
+                            <span class="label">Seat Number</span>
+                            <span class="value value--mono">{{ seat_number }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if candidate_status %}
+                        <div class="field">
+                            <span class="label">Candidate Status</span>
+                            <span class="value">{{ candidate_status }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-card permit-subjects">
+        <div class="section-heading">
+            <div>
+                <div class="section-heading__eyebrow">Registered Papers</div>
+                <h2 class="section-heading__title">Approved Examination Subjects</h2>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table permit-subjects-table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-center">No.</th>
+                        <th scope="col">Subject / Paper</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in registered_subjects %}
+                        <tr>
+                            <td class="text-center">{{ forloop.counter }}</td>
+                            <td><strong>{{ subject }}</strong></td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2" class="empty-state">
+                                No registered examination subjects are available.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <aside class="document-notice document-notice--warning">
+        <div class="document-notice__icon">!</div>
+        <div>
+            <div class="document-notice__title">Important Examination Instructions</div>
+            <div class="document-notice__text">
+                Present this permit together with a valid student identification card at the examination venue. Entry may be denied where the permit is altered, damaged, expired, or cannot be verified.
+            </div>
+        </div>
+    </aside>
+
+    <section class="permit-certification avoid-break">
+        <div class="permit-certification__authorization">
+            <div class="permit-certification__stamp">
+                {% include "reports/shared/_stamp_block.html" %}
+            </div>
+
+            <div class="permit-certification__signature">
+                {% include "reports/shared/_signature_block.html" %}
+            </div>
+        </div>
+
+        <div class="permit-certification__verification">
+            {% include "reports/shared/_qr_block.html" %}
+        </div>
+    </section>
+</main>
+
+{% include "reports/shared/_footer.html" %}

@@ -1,0 +1,159 @@
+{% comment %}
+Professional shared document letterhead for ASMS reports.
+
+Expected context:
+- school_name
+- document_title (optional)
+- document_subtitle (optional)
+- academic_period (optional)
+- branding:
+    logo
+    secondary_logo
+    letterhead_image
+    letterhead_text
+    motto
+    institution_type
+    postal_address
+    physical_address
+    phone
+    email
+    website
+    registration_number
+    accreditation_text
+
+Behaviour:
+- When branding.letterhead_image is supplied, it is used as the complete
+  official letterhead.
+- Otherwise, the template constructs a structured letterhead from the
+  available branding fields.
+- All fields are optional and fail safely when omitted.
+{% endcomment %}
+
+<header class="document-letterhead" role="banner">
+    {% if branding.letterhead_image %}
+        <div class="letterhead-image-wrapper">
+            <img
+                class="letterhead-image"
+                src="{{ branding.letterhead_image }}"
+                alt="{{ school_name|default:'Institution' }} official letterhead"
+            >
+        </div>
+    {% else %}
+        <div class="doc-header doc-header--professional">
+            <div class="doc-header__logo-column">
+                {% if branding.logo %}
+                    <img
+                        class="logo doc-header__logo"
+                        src="{{ branding.logo }}"
+                        alt="{{ school_name|default:'Institution' }} logo"
+                    >
+                {% endif %}
+            </div>
+
+            <div class="doc-header__identity">
+                {% if branding.institution_type %}
+                    <div class="doc-header__institution-type">
+                        {{ branding.institution_type }}
+                    </div>
+                {% endif %}
+
+                <div class="school-name doc-header__school-name">
+                    {{ school_name|default:"" }}
+                </div>
+
+                {% if branding.motto %}
+                    <div class="doc-header__motto">
+                        “{{ branding.motto }}”
+                    </div>
+                {% endif %}
+
+                {% if branding.letterhead_text %}
+                    <div class="letterhead-text doc-header__letterhead-text">
+                        {{ branding.letterhead_text|linebreaksbr }}
+                    </div>
+                {% endif %}
+
+                {% if branding.postal_address or branding.physical_address %}
+                    <div class="doc-header__contact-line">
+                        {% if branding.postal_address %}
+                            <span>{{ branding.postal_address }}</span>
+                        {% endif %}
+                        {% if branding.postal_address and branding.physical_address %}
+                            <span class="doc-header__separator">•</span>
+                        {% endif %}
+                        {% if branding.physical_address %}
+                            <span>{{ branding.physical_address }}</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% if branding.phone or branding.email or branding.website %}
+                    <div class="doc-header__contact-line">
+                        {% if branding.phone %}
+                            <span>Tel: {{ branding.phone }}</span>
+                        {% endif %}
+                        {% if branding.phone and branding.email %}
+                            <span class="doc-header__separator">•</span>
+                        {% endif %}
+                        {% if branding.email %}
+                            <span>Email: {{ branding.email }}</span>
+                        {% endif %}
+                        {% if branding.website and branding.phone or branding.website and branding.email %}
+                            <span class="doc-header__separator">•</span>
+                        {% endif %}
+                        {% if branding.website %}
+                            <span>{{ branding.website }}</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% if branding.registration_number or branding.accreditation_text %}
+                    <div class="doc-header__credentials">
+                        {% if branding.registration_number %}
+                            <span>Registration No: {{ branding.registration_number }}</span>
+                        {% endif %}
+                        {% if branding.registration_number and branding.accreditation_text %}
+                            <span class="doc-header__separator">•</span>
+                        {% endif %}
+                        {% if branding.accreditation_text %}
+                            <span>{{ branding.accreditation_text }}</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="doc-header__logo-column doc-header__logo-column--secondary">
+                {% if branding.secondary_logo %}
+                    <img
+                        class="doc-header__secondary-logo"
+                        src="{{ branding.secondary_logo }}"
+                        alt="Secondary institutional logo"
+                    >
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="doc-header__rule" aria-hidden="true">
+        <span class="doc-header__rule-primary"></span>
+        <span class="doc-header__rule-accent"></span>
+    </div>
+
+    {% if document_title %}
+        <section class="document-heading" aria-label="Document title">
+            <h1 class="doc-title">{{ document_title }}</h1>
+
+            {% if document_subtitle %}
+                <div class="document-heading__subtitle">
+                    {{ document_subtitle }}
+                </div>
+            {% endif %}
+
+            {% if academic_period %}
+                <div class="document-heading__period">
+                    {{ academic_period }}
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+</header>

@@ -1,0 +1,183 @@
+{% comment %}
+Professional ASMS Identification Card - Back Face
+
+Expected context:
+- school_name
+- branding.colors.primary (optional)
+- branding.website (optional)
+- branding.phone (optional)
+- emergency_contact.name (optional)
+- emergency_contact.phone (optional)
+- emergency_contact.address (optional)
+- stamp_image
+- signature_image
+- signatory_title
+- signatory_name (optional)
+
+Compatible with Django ImageField or direct URLs.
+{% endcomment %}
+
+<style>
+@page { size:85.6mm 54mm; margin:0; }
+
+.id-card-back{
+    --primary: {{ branding.colors.primary|default:"#173f73" }};
+    width:85.6mm;
+    height:54mm;
+    box-sizing:border-box;
+    position:relative;
+    overflow:hidden;
+    border:0.35mm solid var(--primary);
+    border-radius:3.2mm;
+    background:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#1f2937;
+}
+
+.id-card-back__header{
+    background:var(--primary);
+    color:#fff;
+    text-align:center;
+    padding:2.2mm;
+    font-size:7pt;
+    font-weight:700;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+}
+
+.id-card-back__content{
+    padding:3mm 4mm 18mm 4mm;
+    font-size:6.2pt;
+    line-height:1.45;
+}
+
+.id-card-back__title{
+    font-weight:700;
+    color:var(--primary);
+    margin-bottom:1.5mm;
+    text-transform:uppercase;
+}
+
+.id-card-back__terms{
+    margin:0;
+    padding-left:4mm;
+}
+
+.id-card-back__terms li{ margin-bottom:1mm; }
+
+.id-card-back__emergency{
+    margin-top:3mm;
+    padding-top:2mm;
+    border-top:.25mm solid #d7dde5;
+}
+
+.id-card-back__label{
+    font-weight:700;
+    color:var(--primary);
+}
+
+.id-card-back__stamp{
+    position:absolute;
+    left:4mm;
+    bottom:4mm;
+    opacity:.18;
+}
+
+.id-card-back__stamp img{
+    width:22mm;
+    height:22mm;
+    object-fit:contain;
+}
+
+.id-card-back__signature{
+    position:absolute;
+    right:4mm;
+    bottom:4mm;
+    text-align:center;
+    width:26mm;
+}
+
+.id-card-back__signature img{
+    max-height:7mm;
+    display:block;
+    margin:0 auto .6mm;
+}
+
+.id-card-back__line{
+    border-top:.25mm solid #444;
+    margin-bottom:.6mm;
+}
+
+.id-card-back__footer{
+    position:absolute;
+    left:4mm;
+    right:4mm;
+    bottom:1mm;
+    display:flex;
+    justify-content:space-between;
+    font-size:4.8pt;
+    color:#6b7280;
+}
+</style>
+
+<article class="id-card-back">
+
+<div class="id-card-back__header">
+    Property of {{ school_name }}
+</div>
+
+<div class="id-card-back__content">
+
+<div class="id-card-back__title">
+Terms & Conditions
+</div>
+
+<ol class="id-card-back__terms">
+<li>If found, please return this card to <strong>{{ school_name }}</strong>.</li>
+<li>This identification card remains the property of the institution.</li>
+<li>It must be produced upon request by authorized staff.</li>
+<li>Loss of this card should be reported immediately.</li>
+<li>Alteration or misuse invalidates this card.</li>
+</ol>
+
+{% if emergency_contact %}
+<div class="id-card-back__emergency">
+<div class="id-card-back__label">Emergency Contact</div>
+
+{% if emergency_contact.name %}
+<div>{{ emergency_contact.name }}</div>
+{% endif %}
+
+{% if emergency_contact.phone %}
+<div>{{ emergency_contact.phone }}</div>
+{% endif %}
+
+{% if emergency_contact.address %}
+<div>{{ emergency_contact.address }}</div>
+{% endif %}
+</div>
+{% endif %}
+
+</div>
+
+{% if stamp_image %}
+<div class="id-card-back__stamp">
+<img src="{{ stamp_image.url|default:stamp_image }}" alt="Official stamp">
+</div>
+{% endif %}
+
+<div class="id-card-back__signature">
+{% if signature_image %}
+<img src="{{ signature_image.url|default:signature_image }}" alt="Authorized signature">
+{% endif %}
+<div class="id-card-back__line"></div>
+<div>{{ signatory_name|default:"Authorized Officer" }}</div>
+<div>{{ signatory_title }}</div>
+</div>
+
+<div class="id-card-back__footer">
+<span>{{ branding.website|default:"" }}</span>
+<span>{{ branding.phone|default:"" }}</span>
+</div>
+
+</article>

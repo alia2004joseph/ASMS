@@ -1,0 +1,60 @@
+{% comment %}
+Professional official stamp block for ASMS reports.
+
+Expected context:
+- stamp_image
+- stamp_label (optional)
+- stamp_date (optional)
+- stamp_position (optional: top_left, top_right, center, bottom_left, bottom_right)
+- stamp_opacity (optional)
+- stamp_rotation (optional)
+
+Behaviour:
+- Renders nothing if no active stamp is available.
+- Compatible with Django ImageField/FileField or direct image URLs.
+- Uses enterprise CSS classes from shared/_base_styles.html.
+{% endcomment %}
+
+{% if stamp_image %}
+<aside
+    class="
+        stamp-block
+        {% if stamp_position %}
+            stamp-block--{{ stamp_position }}
+        {% else %}
+            stamp-block--bottom-right
+        {% endif %}
+    "
+    {% if stamp_opacity or stamp_rotation %}
+        style="
+        {% if stamp_opacity %}opacity: {{ stamp_opacity }};{% endif %}
+        {% if stamp_rotation %}transform: rotate({{ stamp_rotation }}deg);{% endif %}
+        "
+    {% endif %}
+    aria-label="Official institutional stamp"
+>
+    <div class="stamp-block__container">
+        <img
+            class="stamp-block__image"
+            src="{{ stamp_image.url|default:stamp_image }}"
+            alt="Official institutional stamp"
+        >
+
+        {% if stamp_label or stamp_date %}
+        <div class="stamp-block__caption">
+            {% if stamp_label %}
+                <div class="stamp-block__label">
+                    {{ stamp_label }}
+                </div>
+            {% endif %}
+
+            {% if stamp_date %}
+                <div class="stamp-block__date">
+                    {{ stamp_date }}
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</aside>
+{% endif %}
