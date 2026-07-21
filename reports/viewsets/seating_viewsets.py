@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from reports.models.examinations_admin import SeatingPlan,SeatAssignment,InvigilatorAssignment
+from reports.models.seating import SeatingPlan,SeatAssignment,InvigilatorAssignment
 from reports.permissions.report_permissions import BaseReportPermission
 from reports.serializers.seating_serializers import (
     SeatingPlanSerializer,SeatAssignmentSerializer,

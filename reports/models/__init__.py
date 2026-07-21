@@ -22,7 +22,7 @@ from .bulk_jobs import BulkReportJob, BulkReportItem, BulkExportArchive
 from .transcripts import TranscriptRecord, TranscriptGPASnapshot
 from .certificates import CertificateTemplate, Certificate
 from .id_cards import IDCard
-from .examinations_admin import SeatingPlan, SeatAssignment, InvigilatorAssignment
+from .seating import SeatingPlan, SeatAssignment, InvigilatorAssignment
 from .performance_history import PerformanceSnapshot
 
 __all__ = [

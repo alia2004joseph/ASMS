@@ -178,15 +178,12 @@ class CustomReportDefinitionSerializer(serializers.ModelSerializer):
 
 class CustomReportExecutionSerializer(serializers.ModelSerializer):
     definition_id = serializers.IntegerField(
-        source="definition_id",
         read_only=True,
     )
     executed_by_id = serializers.IntegerField(
-        source="executed_by_id",
         read_only=True,
     )
     generated_report_id = serializers.IntegerField(
-        source="generated_report_id",
         read_only=True,
     )
 

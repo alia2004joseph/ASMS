@@ -13,7 +13,7 @@ from django.db.models import Count
 
 from reports.constants import SeatAssignmentStatus
 from reports.exceptions import ValidationError
-from reports.models.examinations_admin import (
+from reports.models.seating import (
     InvigilatorAssignment,
     SeatAssignment,
     SeatingPlan,

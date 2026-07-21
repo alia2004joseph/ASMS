@@ -20,7 +20,7 @@ from reports.models.custom_reports import (
     CustomReportGroup,
     CustomReportSort,
 )
-from reports.models.examinations_admin import (
+from reports.models.seating import (
     InvigilatorAssignment,
     SeatAssignment,
     SeatingPlan,

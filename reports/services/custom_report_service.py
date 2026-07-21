@@ -45,6 +45,15 @@ from reports.constants import (
 )
 from reports.exceptions import RegistryError, ValidationError
 from reports.services import report_registry_service as registry_service
+from django.db import transaction
+
+from reports.models.custom_reports import (
+    CustomReportDefinition,
+    CustomReportField,
+    CustomReportFilter,
+    CustomReportGroup,
+    CustomReportSort,
+)
 
 
 DEFAULT_PREVIEW_LIMIT = 50
@@ -628,3 +637,219 @@ def execute_preview(
         group_specs=group_specs,
     )
     return list(queryset[:limit])
+
+@transaction.atomic
+def create_definition(
+    *,
+    school,
+    owner,
+    created_by,
+    name,
+    description="",
+    data_source_key,
+    is_public=False,
+    is_active=True,
+    fields,
+    filters=None,
+    sorts=None,
+    groups=None,
+):
+    """
+    Create a custom report definition and all nested configuration records.
+    """
+
+    if school is None or getattr(school, "pk", None) is None:
+        raise ValidationError("A persisted school is required.")
+
+    if owner is None or getattr(owner, "pk", None) is None:
+        raise ValidationError("A persisted owner is required.")
+
+    if not fields:
+        raise ValidationError(
+            "At least one report field must be selected."
+        )
+
+    source = registry_service.validate_source_access(
+        data_source_key,
+        owner,
+    )
+    if source is None:
+        raise RegistryError(
+            f"Data source '{data_source_key}' is not available."
+        )
+
+    definition = CustomReportDefinition.objects.create(
+        school=school,
+        owner=owner,
+        created_by=created_by,
+        name=name,
+        description=description,
+        data_source_key=data_source_key,
+        is_public=is_public,
+        is_active=is_active,
+    )
+
+    CustomReportField.objects.bulk_create(
+        [
+            CustomReportField(
+                definition=definition,
+                **field_data,
+            )
+            for field_data in fields
+        ]
+    )
+
+    CustomReportFilter.objects.bulk_create(
+        [
+            CustomReportFilter(
+                definition=definition,
+                **filter_data,
+            )
+            for filter_data in (filters or [])
+        ]
+    )
+
+    CustomReportSort.objects.bulk_create(
+        [
+            CustomReportSort(
+                definition=definition,
+                **sort_data,
+            )
+            for sort_data in (sorts or [])
+        ]
+    )
+
+    CustomReportGroup.objects.bulk_create(
+        [
+            CustomReportGroup(
+                definition=definition,
+                **group_data,
+            )
+            for group_data in (groups or [])
+        ]
+    )
+
+    return definition
+
+
+@transaction.atomic
+def update_definition(
+    *,
+    definition,
+    updated_by,
+    changes,
+):
+    """
+    Update a custom report definition.
+
+    Nested configuration is replaced only when its corresponding key is
+    included in ``changes``.
+    """
+
+    if definition is None or getattr(definition, "pk", None) is None:
+        raise ValidationError(
+            "A persisted report definition is required."
+        )
+
+    if updated_by is None or getattr(updated_by, "pk", None) is None:
+        raise ValidationError("A persisted user is required.")
+
+    definition = (
+        CustomReportDefinition.objects
+        .select_for_update()
+        .get(pk=definition.pk)
+    )
+
+    nested_keys = {
+        "fields",
+        "filters",
+        "sorts",
+        "groups",
+    }
+
+    scalar_changes = {
+        key: value
+        for key, value in changes.items()
+        if key not in nested_keys
+    }
+
+    if "data_source_key" in scalar_changes:
+        source = registry_service.validate_source_access(
+            scalar_changes["data_source_key"],
+            updated_by,
+        )
+        if source is None:
+            raise RegistryError(
+                f"Data source "
+                f"'{scalar_changes['data_source_key']}' "
+                "is not available."
+            )
+
+    for field_name, value in scalar_changes.items():
+        setattr(definition, field_name, value)
+
+    if hasattr(definition, "updated_by"):
+        definition.updated_by = updated_by
+
+    definition.save()
+
+    if "fields" in changes:
+        fields = changes["fields"]
+
+        if not fields:
+            raise ValidationError(
+                "At least one report field must be selected."
+            )
+
+        definition.fields.all().delete()
+
+        CustomReportField.objects.bulk_create(
+            [
+                CustomReportField(
+                    definition=definition,
+                    **field_data,
+                )
+                for field_data in fields
+            ]
+        )
+
+    if "filters" in changes:
+        definition.filters.all().delete()
+
+        CustomReportFilter.objects.bulk_create(
+            [
+                CustomReportFilter(
+                    definition=definition,
+                    **filter_data,
+                )
+                for filter_data in changes["filters"]
+            ]
+        )
+
+    if "sorts" in changes:
+        definition.sorts.all().delete()
+
+        CustomReportSort.objects.bulk_create(
+            [
+                CustomReportSort(
+                    definition=definition,
+                    **sort_data,
+                )
+                for sort_data in changes["sorts"]
+            ]
+        )
+
+    if "groups" in changes:
+        definition.groups.all().delete()
+
+        CustomReportGroup.objects.bulk_create(
+            [
+                CustomReportGroup(
+                    definition=definition,
+                    **group_data,
+                )
+                for group_data in changes["groups"]
+            ]
+        )
+
+    return definition
