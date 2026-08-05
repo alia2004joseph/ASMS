@@ -5,7 +5,7 @@ Expected context:
 - signatory_name
 - signatory_title
 - signature_image
-- position:
+- signature_position:
     zone
     alignment
     width
@@ -27,16 +27,16 @@ Behaviour:
     <section
         class="
             signature-block
-            {% if position.zone == 'bottom_right' or position.alignment == 'right' %}
+            {% if signature_position.zone == 'bottom_right' or signature_position.alignment == 'right' %}
                 signature-block--right
-            {% elif position.zone == 'bottom_center' or position.alignment == 'center' %}
+            {% elif signature_position.zone == 'bottom_center' or signature_position.alignment == 'center' %}
                 signature-block--center
             {% else %}
                 signature-block--left
             {% endif %}
         "
         aria-label="Authorized signature"
-        {% if position.width %}style="width: {{ position.width }};"{% endif %}
+        {% if signature_position.width %}style="width: {{ signature_position.width }};"{% endif %}
     >
         <div class="signature-block__content">
             <div class="signature-block__image-area">
