@@ -35,8 +35,7 @@ _ALLOWED_UPDATE_FIELDS = {
     "stamp",
     "position",
     "is_active",
-    "valid_from",
-    "valid_until",
+    "display_order",
 }
 
 
@@ -95,8 +94,8 @@ def _validate_assignment_consistency(
             )
 
     if (
-        assignment.valid_from
-        and assignment.valid_until
+        getattr(assignment, "valid_from", None)
+        and getattr(assignment, "valid_until", None)
         and assignment.valid_until < assignment.valid_from
     ):
         raise ValidationError(
@@ -137,13 +136,10 @@ def resolve_assignment(
             document_type=document_type,
             is_active=True,
         )
-        .order_by("-valid_from", "-pk")
+        .order_by("-display_order", "-pk")
     )
 
     for assignment in assignments:
-        if not _is_within_validity(assignment, current_date):
-            continue
-
         _validate_assignment_consistency(assignment)
 
         if not _resource_is_usable(
@@ -258,16 +254,7 @@ def _snapshot(
         "stamp_id": assignment.stamp_id,
         "position": assignment.position,
         "is_active": assignment.is_active,
-        "valid_from": (
-            assignment.valid_from.isoformat()
-            if assignment.valid_from
-            else None
-        ),
-        "valid_until": (
-            assignment.valid_until.isoformat()
-            if assignment.valid_until
-            else None
-        ),
+        "display_order": assignment.display_order,
     }
 
 
