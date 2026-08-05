@@ -30,6 +30,14 @@ Behaviour:
 {% endcomment %}
 
 <header class="document-letterhead" role="banner">
+    <div class="security-frame security-frame--subtle" aria-hidden="true"></div>
+
+    {% if branding.microtext %}
+        <div class="microtext" aria-hidden="true">
+            {{ branding.microtext }} &nbsp;•&nbsp; {{ branding.microtext }} &nbsp;•&nbsp; {{ branding.microtext }} &nbsp;•&nbsp; {{ branding.microtext }}
+        </div>
+    {% endif %}
+
     {% if branding.letterhead_image %}
         <div class="letterhead-image-wrapper">
             <img

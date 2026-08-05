@@ -18,6 +18,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from reports.constants import DocumentType
 from reports.models.certificates import Certificate, CertificateTemplate
 from reports.permissions.report_permissions import (
     BaseReportPermission,
@@ -30,7 +31,7 @@ from reports.serializers.certificate_serializers import (
     CertificateTemplateSerializer,
     CertificateVerifyResponseSerializer,
 )
-from reports.services import certificate_service
+from reports.services import certificate_service, signature_service
 
 
 class CertificateTemplateViewSet(viewsets.ModelViewSet):
@@ -185,11 +186,20 @@ class CertificateViewSet(
         school = certificate.school
         student = certificate.student
         student_user = student.user
+        template_branding = certificate.template.branding or {}
+
+        signature_context = signature_service.build_signature_context(
+            school,
+            DocumentType.CERTIFICATE,
+        )
 
         verification_url = request.build_absolute_uri(
             f"/api/reports/certificates/verify/"
             f"{certificate.verification_code}/"
         )
+
+        signature_image = signature_context.get("signature_image")
+        stamp_image = signature_context.get("stamp_image")
 
         return {
             "certificate_type_display": (
@@ -212,36 +222,71 @@ class CertificateViewSet(
             ),
             "school_name": school.name,
 
-            "headteacher_name": "Authorised Signatory",
-            "headteacher_title": "Headteacher",
-            "headteacher_signature_url": "",
-            "stamp_url": "",
+            "headteacher_name": (
+                signature_context.get("signatory_name")
+                or "Authorised Signatory"
+            ),
+            "headteacher_title": (
+                signature_context.get("signatory_title")
+                or "Headteacher"
+            ),
+            "headteacher_signature_url": (
+                signature_image.url if signature_image else ""
+            ),
+            "stamp_url": stamp_image.url if stamp_image else "",
 
             "verification_code": certificate.verification_code,
             "verification_url": verification_url,
             "qr_code_url": CertificateTemplateViewSet.generate_qr_data_uri(verification_url),
 
+            "document_version": certificate.version,
+            "document_fingerprint": certificate.file_hash,
+
+            "grade": template_branding.get("grade", ""),
+            "distinction": template_branding.get("distinction", ""),
+            "honours": template_branding.get("honours", ""),
+
             "branding": {
                 "school_name": school.name,
-                "school_motto": "",
+                "school_motto": template_branding.get("motto", ""),
                 "school_address": school.address or "",
                 "school_phone": school.phone or "",
                 "school_email": school.email or "",
-                "logo_url": "",
+                "logo_url": template_branding.get("logo_url", ""),
 
-                "font_family": "DejaVu Sans, Arial, sans-serif",
-                "heading_font_family": "Georgia, Times New Roman, serif",
-                "font_size_base": "10.5pt",
+                "font_family": template_branding.get(
+                    "font_family", "DejaVu Sans, Arial, sans-serif"
+                ),
+                "heading_font_family": template_branding.get(
+                    "heading_font_family",
+                    "Georgia, Times New Roman, serif",
+                ),
+                "font_size_base": template_branding.get(
+                    "font_size_base", "10.5pt"
+                ),
 
-                "background_image": "",
-                "watermark_image": "",
-                "watermark_text": school.name,
+                "background_image": template_branding.get(
+                    "background_image", ""
+                ),
+                "watermark_image": template_branding.get(
+                    "watermark_image", ""
+                ),
+                "watermark_text": template_branding.get(
+                    "watermark_text", school.name
+                ),
+                "microtext": template_branding.get(
+                    "microtext",
+                    f"{school.name} • OFFICIAL DOCUMENT",
+                ),
 
-                "colors": {
-                    "primary": "#173b63",
-                    "secondary": "#5f6976",
-                    "accent": "#d3aa4d",
-                },
+                "colors": template_branding.get(
+                    "colors",
+                    {
+                        "primary": "#173b63",
+                        "secondary": "#5f6976",
+                        "accent": "#d3aa4d",
+                    },
+                ),
             },
 
             "page_config": {
@@ -447,6 +492,7 @@ class CertificateViewSet(
         if certificate is None:
             context = {
                 "is_valid": False,
+                "verification_code": verification_code,
                 "branding": {
                     "font_family": "'DejaVu Sans', Arial, sans-serif",
                     "heading_font_family": "Georgia, 'Times New Roman', serif",

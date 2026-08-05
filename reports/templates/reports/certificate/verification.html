@@ -97,11 +97,35 @@
         font-size: 12px;
         line-height: 1.5;
     }
+
+    .verification-logo {
+        display: block;
+        width: auto;
+        max-width: 64px;
+        height: 64px;
+        margin: 0 auto 14px;
+        object-fit: contain;
+    }
+
+    .verification-fingerprint {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border: 1px solid #d8e0e8;
+        background: #f8fafc;
+        color: #56616e;
+        font-family: "DejaVu Sans Mono", monospace;
+        font-size: 11px;
+        word-break: break-all;
+    }
 </style>
 
 <main class="verification-page">
 
     <section class="verification-card">
+
+        {% if branding.logo_url %}
+            <img class="verification-logo" src="{{ branding.logo_url }}" alt="{{ school_name }} logo">
+        {% endif %}
 
         {% if is_valid and not is_revoked %}
 
@@ -163,6 +187,12 @@
                 Verification reference: {{ verification_code }}
             </div>
 
+            {% if document_hash %}
+                <div class="verification-fingerprint">
+                    SHA-256 fingerprint: {{ document_hash }}
+                </div>
+            {% endif %}
+
             {% elif is_revoked %}
 
     <div class="verification-status verification-status--invalid">
@@ -185,8 +215,28 @@
         </tr>
 
         <tr>
+            <th>Certificate</th>
+            <td>{{ certificate_type_display|default:"—" }}</td>
+        </tr>
+
+        <tr>
             <th>Certificate number</th>
             <td>{{ serial_number }}</td>
+        </tr>
+
+        <tr>
+            <th>Issue date</th>
+            <td>{{ issued_at|default:"—" }}</td>
+        </tr>
+
+        <tr>
+            <th>Issued by</th>
+            <td>{{ school_name }}</td>
+        </tr>
+
+        <tr>
+            <th>Status</th>
+            <td>REVOKED</td>
         </tr>
 
         <tr>
@@ -194,6 +244,10 @@
             <td>{{ revoked_reason|default:"No public reason supplied." }}</td>
         </tr>
     </table>
+
+    <div class="verification-reference">
+        Verification reference: {{ verification_code|default:serial_number }}
+    </div>
 
         {% else %}
 
@@ -209,6 +263,12 @@
                 The supplied verification reference is invalid, unavailable,
                 or no longer active.
             </p>
+
+            {% if verification_code %}
+                <div class="verification-reference">
+                    Reference searched: {{ verification_code }}
+                </div>
+            {% endif %}
 
         {% endif %}
 

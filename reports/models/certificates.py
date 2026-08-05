@@ -28,6 +28,17 @@ class CertificateTemplate(SchoolScopedModel, AuditableModel):
         blank=True,
     )
 
+    branding = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=(
+            "Branding configuration for this certificate template: logo, "
+            "colors, motto, letterhead/background/watermark images, font "
+            "family, and security microtext. Falls back to sensible "
+            "defaults when a field is not configured."
+        ),
+    )
+
     signature_fields = models.JSONField(
         default=dict,
         blank=True,
