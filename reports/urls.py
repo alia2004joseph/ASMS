@@ -2,6 +2,7 @@
 Production URL configuration for the Reports module.
 """
 
+
 from rest_framework.routers import DefaultRouter
 
 from reports.viewsets.certificate_viewsets import (
@@ -100,3 +101,4 @@ router.register(
 )
 
 urlpatterns = router.urls
+

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 
+
 from reports.models.base import (
     AbstractGeneratedArtifact,
     AuditableModel,
@@ -53,6 +54,45 @@ class CertificateTemplate(SchoolScopedModel, AuditableModel):
             f"({self.school_id})"
         )
 
+
+
+
+class CertificateNumberSequence(SchoolScopedModel):
+    """
+    Maintains a safe school-specific certificate sequence.
+
+    A separate sequence is maintained for every school, year,
+    and certificate type.
+    """
+
+    year = models.PositiveIntegerField()
+
+    certificate_type = models.CharField(
+        max_length=20,
+        choices=CertificateTemplate.CERTIFICATE_TYPES,
+    )
+
+    last_number = models.PositiveBigIntegerField(
+        default=0,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "school",
+                    "year",
+                    "certificate_type",
+                ],
+                name="unique_certificate_number_sequence",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.school.code}-{self.year}-"
+            f"{self.certificate_type}: {self.last_number}"
+        )
 
 class Certificate(
     AbstractGeneratedArtifact,

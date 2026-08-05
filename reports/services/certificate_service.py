@@ -1,12 +1,21 @@
 import logging
 import uuid
 
-from django.db import transaction
+from django.db import transaction,IntegrityError
 from django.utils import timezone
+import secrets
+
+
+
+from reports.models.certificates import (
+    Certificate,
+    CertificateNumberSequence,
+    CertificateTemplate,
+)
 
 from reports.constants import CertificateStatus, VerificationResult
 from reports.exceptions import ValidationError
-from reports.models.certificates import Certificate, CertificateTemplate
+
 from reports.services import versioning_service
 from reports.services.qrcode_service import generate_verification_code
 
@@ -60,12 +69,68 @@ def _validate_request(*, student, school, issued_by, template):
         )
 
 
+CERTIFICATE_TYPE_CODES = {
+    "COMPLETION": "COM",
+    "PARTICIPATION": "PAR",
+    "GRADUATION": "GRD",
+    "TESTIMONIAL": "TES",
+}
+
+
 def _generate_serial_number(*, school, certificate_type):
+    """
+    Generate a sequential certificate number safely.
+
+    Example:
+        CERT-ALIA-2026-COM-000001
+    """
+
+    current_year = timezone.localdate().year
+
+    sequence, _ = (
+        CertificateNumberSequence.objects
+        .select_for_update()
+        .get_or_create(
+            school=school,
+            year=current_year,
+            certificate_type=certificate_type,
+            defaults={"last_number": 0},
+        )
+    )
+
+    sequence.last_number += 1
+    sequence.save(update_fields=["last_number"])
+
+    school_code = school.code.strip().upper()
+
+    type_code = CERTIFICATE_TYPE_CODES.get(
+        certificate_type,
+        certificate_type[:3].upper(),
+    )
+
     return (
-        f"CERT-"
-        f"{school.pk}-"
-        f"{certificate_type}-"
-        f"{uuid.uuid4().hex[:12].upper()}"
+        f"CERT-{school_code}-{current_year}-"
+        f"{type_code}-{sequence.last_number:06d}"
+    )
+
+def _generate_verification_code():
+    """
+    Generate a non-sequential public verification token.
+
+    The value should be difficult to guess and should not expose
+    how many certificates the school has issued.
+    """
+
+    for _ in range(10):
+        code = secrets.token_urlsafe(24)
+
+        if not Certificate.objects.filter(
+            verification_code=code,
+        ).exists():
+            return code
+
+    raise RuntimeError(
+        "A unique certificate verification code could not be generated."
     )
 
 
@@ -103,16 +168,16 @@ def issue_certificate(
     )
 
     certificate = Certificate(
-        school=school,
-        student=student,
-        certificate_type=certificate_type,
-        template=template,
-        serial_number=serial_number,
-        verification_code=generate_verification_code(),
-        issued_by=issued_by,
-        issued_at=timezone.now(),
-        status=CertificateStatus.READY,
-    )
+    school=school,
+    student=student,
+    certificate_type=certificate_type,
+    template=template,
+    serial_number=serial_number,
+    verification_code=_generate_verification_code(),
+    issued_by=issued_by,
+    issued_at=timezone.now(),
+    status=CertificateStatus.READY,
+)
 
     certificate.full_clean()
     certificate.save()

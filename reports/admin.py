@@ -9,9 +9,17 @@ from __future__ import annotations
 
 from django.contrib import admin
 from django.db.models import QuerySet
+from django.utils import timezone
+import secrets
 
 from reports.models.bulk_jobs import BulkExportArchive, BulkReportItem, BulkReportJob
-from reports.models.certificates import Certificate, CertificateTemplate
+from reports.models.certificates import (
+    Certificate,
+    CertificateNumberSequence,
+    CertificateTemplate,
+   
+)
+from reports.services import certificate_service
 from reports.models.custom_reports import (
     CustomReportDefinition,
     CustomReportExecution,
@@ -386,17 +394,179 @@ class CertificateTemplateAdmin(SchoolScopedAdminMixin, admin.ModelAdmin):
     ordering = ("school", "certificate_type", "-version")
 
 
+from django.contrib import admin
+
+from reports.models.certificates import Certificate
+
+
 @admin.register(Certificate)
 class CertificateAdmin(SchoolScopedAdminMixin, admin.ModelAdmin):
-    list_display = ("serial_number", "student", "certificate_type", "school", "status", "version", "is_latest", "issued_at")
-    list_filter = ("certificate_type", "status", "export_format", "is_latest", "is_revoked", "school")
-    search_fields = ("serial_number", "verification_code", "student__first_name", "student__last_name", "file_hash")
-    raw_id_fields  = ("school", "student", "template", "issued_by", "previous_version", "revoked_by")
-    readonly_fields = ("root_id", "file_hash", "file_size", "mime_type", "created_at", "revoked_at")
-    list_select_related = ("school", "student", "template", "issued_by")
-    date_hierarchy = "issued_at"
-    ordering = ("-issued_at",)
+    list_display = (
+        "serial_number",
+        "student",
+        "certificate_type",
+        "school",
+        "status",
+        "version",
+        "is_latest",
+        "issued_at",
+    )
 
+    list_filter = (
+        "certificate_type",
+        "status",
+        "export_format",
+        "is_latest",
+        "is_revoked",
+        "school",
+    )
+
+    search_fields = (
+        "serial_number",
+        "verification_code",
+        "student__student_id_number",
+        "student__user__first_name",
+        "student__user__last_name",
+        "student__user__email",
+        "file_hash",
+    )
+
+    raw_id_fields = (
+        "school",
+        "student",
+        "template",
+        "issued_by",
+        "previous_version",
+        "revoked_by",
+    )
+
+    readonly_fields = (
+    "serial_number",
+    "verification_code",
+    "issued_by",
+    "issued_at",
+    "root_id",
+    "version",
+    "file_hash",
+    "file_size",
+    "mime_type",
+    "created_at",
+    "is_revoked",
+    "revoked_reason",
+    "revoked_at",
+    "revoked_by",
+)
+
+    list_select_related = (
+        "school",
+        "student__user",
+        "template",
+        "issued_by",
+    )
+
+    date_hierarchy = "issued_at"
+
+    ordering = (
+        "-issued_at",
+        "-pk",
+    )
+
+    fieldsets = (
+        (
+            "Certificate details",
+            {
+                "fields": (
+                    "school",
+                    "student",
+                    "certificate_type",
+                    "template",
+                ),
+            },
+        ),
+        (
+            "Generated details",
+            {
+                "fields": (
+                    "serial_number",
+                    "verification_code",
+                    "issued_by",
+                    "issued_at",
+                    "status",
+                ),
+            },
+        ),
+        (
+            "Generated file",
+            {
+                "fields": (
+                    "file",
+                    "export_format",
+                    "file_hash",
+                    "file_size",
+                    "mime_type",
+                    "failure_message",
+                ),
+            },
+        ),
+        (
+            "Versioning and revocation",
+            {
+                "fields": (
+                    "root_id",
+                    "version",
+                    "previous_version",
+                    "is_latest",
+                    "regeneration_reason",
+                    "is_revoked",
+                    "revoked_reason",
+                    "revoked_at",
+                    "revoked_by",
+                ),
+            },
+        ),
+        (
+            "Audit",
+            {
+                "fields": (
+                    "created_at",
+                ),
+            },
+        ),
+    )
+
+    def has_change_permission(self, request, obj=None):
+        """
+        Issued certificates should not be silently edited.
+
+        Administrators may still open the record and use dedicated
+        regeneration or revocation workflows.
+        """
+        if obj and obj.issued_at:
+            return request.user.is_superuser
+
+        return super().has_change_permission(request, obj)
+
+    def save_model(self, request, obj, form, change):
+        """
+        Certificate creation should normally go through certificate_service.
+
+        This fallback supports Django-admin creation while keeping generated
+        fields controlled by the backend.
+        """
+        if not change:
+            certificate = certificate_service.issue_certificate(
+                student=obj.student,
+                school=obj.school,
+                certificate_type=obj.certificate_type,
+                issued_by=request.user,
+                template=obj.template,
+            )
+
+            obj.pk = certificate.pk
+            obj._state.adding = False
+            return
+
+        super().save_model(request, obj, form, change)
 
 @admin.register(FeeClearanceCertificate)
 class FeeClearanceCertificateAdmin(SchoolScopedAdminMixin, admin.ModelAdmin):
@@ -588,3 +758,33 @@ class SignatureAssignmentHistoryAdmin(SchoolScopedAdminMixin, ReadOnlyAuditAdmin
     list_select_related = ("school", "assignment", "changed_by")
     date_hierarchy = "changed_at"
     ordering = ("-changed_at",)
+
+@admin.register(CertificateNumberSequence)
+class CertificateNumberSequenceAdmin(admin.ModelAdmin):
+    list_display = (
+        "school",
+        "year",
+        "certificate_type",
+        "last_number",
+    )
+
+    list_filter = (
+        "school",
+        "year",
+        "certificate_type",
+    )
+
+    search_fields = (
+        "school__name",
+        "school__code",
+    )
+
+    ordering = (
+        "-year",
+        "school",
+        "certificate_type",
+    )
+
+    readonly_fields = (
+        "last_number",
+    )

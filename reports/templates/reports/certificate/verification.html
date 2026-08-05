@@ -1,0 +1,222 @@
+{% include "reports/shared/_base_styles.html" %}
+
+<style>
+    @media screen {
+        body {
+            max-width: 900px;
+            min-height: auto;
+            padding: 32px;
+        }
+    }
+
+    .verification-page {
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .verification-card {
+        padding: 34px;
+        border: 1px solid #d8e0e8;
+        border-top: 5px solid {{ branding.colors.primary|default:"#173b63" }};
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .verification-status {
+        display: inline-block;
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+    }
+
+    .verification-status--valid {
+        border: 1px solid #9bc9a5;
+        background: #edf8ef;
+        color: #276438;
+    }
+
+    .verification-status--invalid {
+        border: 1px solid #ddb1b1;
+        background: #fff0f0;
+        color: #8a2f2f;
+    }
+
+    .verification-title {
+        margin: 22px 0 8px;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 30px;
+    }
+
+    .verification-subtitle {
+        color: #65707d;
+        font-size: 15px;
+    }
+
+    .verification-details {
+        width: 100%;
+        margin-top: 28px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .verification-details th,
+    .verification-details td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #e1e6ec;
+    }
+
+    .verification-details th {
+        width: 38%;
+        color: #687481;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+
+    .verification-details td {
+        color: #202a35;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .verification-reference {
+        margin-top: 24px;
+        padding: 12px;
+        border: 1px solid #d8e0e8;
+        background: #f8fafc;
+        color: #56616e;
+        font-family: "DejaVu Sans Mono", monospace;
+        font-size: 12px;
+    }
+
+    .verification-footer {
+        margin-top: 24px;
+        color: #77818d;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+</style>
+
+<main class="verification-page">
+
+    <section class="verification-card">
+
+        {% if is_valid and not is_revoked %}
+
+            <div class="verification-status verification-status--valid">
+                ✓ Certificate verified
+            </div>
+
+            <h1 class="verification-title">
+                Authentic Certificate
+            </h1>
+
+            <p class="verification-subtitle">
+                This certificate was issued by {{ school_name }}.
+            </p>
+
+            <table class="verification-details">
+                <tr>
+                    <th>Student</th>
+                    <td>{{ student_name }}</td>
+                </tr>
+
+                <tr>
+                    <th>Student number</th>
+                    <td>{{ student_number }}</td>
+                </tr>
+
+                <tr>
+                    <th>Certificate</th>
+                    <td>{{ certificate_type_display }}</td>
+                </tr>
+
+                <tr>
+                    <th>Certificate number</th>
+                    <td>{{ serial_number }}</td>
+                </tr>
+
+                <tr>
+                    <th>Issue date</th>
+                    <td>{{ issued_at }}</td>
+                </tr>
+
+                <tr>
+                    <th>Issued by</th>
+                    <td>{{ school_name }}</td>
+                </tr>
+
+                <tr>
+    <th>Status</th>
+    <td>VALID</td>
+</tr>
+
+<tr>
+    <th>Document integrity</th>
+    <td>{{ integrity_status }}</td>
+</tr>
+            </table>
+
+            <div class="verification-reference">
+                Verification reference: {{ verification_code }}
+            </div>
+
+            {% elif is_revoked %}
+
+    <div class="verification-status verification-status--invalid">
+        ✕ Certificate revoked
+    </div>
+
+    <h1 class="verification-title">
+        Certificate No Longer Valid
+    </h1>
+
+    <p class="verification-subtitle">
+        This certificate was issued by {{ school_name }}, but it has
+        subsequently been revoked.
+    </p>
+
+    <table class="verification-details">
+        <tr>
+            <th>Student</th>
+            <td>{{ student_name }}</td>
+        </tr>
+
+        <tr>
+            <th>Certificate number</th>
+            <td>{{ serial_number }}</td>
+        </tr>
+
+        <tr>
+            <th>Reason</th>
+            <td>{{ revoked_reason|default:"No public reason supplied." }}</td>
+        </tr>
+    </table>
+
+        {% else %}
+
+            <div class="verification-status verification-status--invalid">
+                ✕ Verification failed
+            </div>
+
+            <h1 class="verification-title">
+                Certificate Not Found
+            </h1>
+
+            <p class="verification-subtitle">
+                The supplied verification reference is invalid, unavailable,
+                or no longer active.
+            </p>
+
+        {% endif %}
+
+        <footer class="verification-footer">
+            Verification provided by ASMS. Do not accept a certificate whose
+            printed information differs from the information shown here.
+        </footer>
+
+    </section>
+
+</main>

@@ -132,22 +132,38 @@ class VersionedModel(models.Model):
     def clean(self):
         super().clean()
 
-        if self.is_revoked:
-            errors = {}
+        errors = {}
 
+        if self.is_revoked:
             if not self.revoked_reason.strip():
                 errors["revoked_reason"] = (
                     "A revocation reason is required."
                 )
 
-            if self.revoked_at is None:
-                errors["revoked_at"] = (
-                    "A revocation timestamp is required."
+            if self.revoked_at is None or self.revoked_by_id is None:
+                errors["is_revoked"] = (
+                    "Use the official revocation workflow so that the "
+                    "revocation time and revoking user are recorded automatically."
                 )
 
-            if errors:
-                raise ValidationError(errors)
+        else:
+            if self.revoked_reason:
+                errors["revoked_reason"] = (
+                    "A non-revoked document cannot have a revocation reason."
+                )
 
+            if self.revoked_at is not None:
+                errors["is_revoked"] = (
+                    "A non-revoked document cannot have a revocation timestamp."
+                )
+
+            if self.revoked_by_id is not None:
+                errors["is_revoked"] = (
+                    "A non-revoked document cannot have a revoking user."
+                )
+
+        if errors:
+            raise ValidationError(errors)
     class Meta:
         abstract = True
 

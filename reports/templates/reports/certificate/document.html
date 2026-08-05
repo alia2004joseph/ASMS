@@ -1,93 +1,728 @@
+
 {% comment %}
 Professional Certificate template for ASMS.
-Backward compatible with original context.
+Designed for browser preview and WeasyPrint PDF generation.
 {% endcomment %}
-
+{% load static %}
 {% include "reports/shared/_base_styles.html" %}
 
-{% with document_title=certificate_type_display|default:"Certificate" %}
-    {% include "reports/shared/_header_letterhead.html" %}
-{% endwith %}
+<style>
+    
+    @page {
+        size: A4 landscape;
+        margin: 8mm;
+    }
 
-<main class="document-body certificate-document">
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+    }
 
-<section class="certificate-frame">
 
-    <div class="certificate-frame__border">
+    @media screen {
+    body {
+        max-width: 297mm;
+        min-height: 210mm;
+        margin: 12px auto;
+        padding: 8mm;
+    }
+}
+html {
+    background: #e9edf2;
+}
 
-        <div class="certificate-header">
-            <div class="certificate-header__subtitle">
-                This certifies that
-            </div>
+    .certificate-document {
+        position: relative;
+        min-height: 182mm;
+        color: #1b2430;
+    }
+
+    .certificate-frame {
+        position: relative;
+        min-height: 182mm;
+        padding: 5mm;
+        border: 2.2pt solid {{ branding.colors.primary|default:"#173b63" }};
+        background: #ffffff;
+    }
+
+    .certificate-frame::before {
+        content: "";
+        position: absolute;
+        inset: 3mm;
+        border: 0.8pt solid {{ branding.colors.accent|default:"#d3aa4d" }};
+        pointer-events: none;
+    }
+
+    .certificate-frame::after {
+        content: "";
+        position: absolute;
+        inset: 5mm;
+        border: 0.35pt solid #cfd7e0;
+        pointer-events: none;
+    }
+
+    .certificate-inner {
+        position: relative;
+        z-index: 2;
+        min-height: 165mm;
+        padding: 8mm 12mm 7mm;
+        text-align: center;
+    }
+
+    .certificate-letterhead {
+        display: table;
+        width: 100%;
+        margin-bottom: 3mm;
+        text-align: left;
+    }
+
+    .certificate-letterhead__logo,
+    .certificate-letterhead__identity,
+    .certificate-letterhead__reference {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .certificate-letterhead__logo {
+        width: 28mm;
+    }
+
+    .certificate-logo {
+        display: block;
+        width: 23mm;
+        height: 23mm;
+        object-fit: contain;
+    }
+
+    .certificate-letterhead__identity {
+        text-align: center;
+    }
+
+    .certificate-school-name {
+        margin: 0;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-family: {{ branding.heading_font_family|default:branding.font_family }};
+        font-size: 19pt;
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: 0.4pt;
+        text-transform: uppercase;
+    }
+
+    .certificate-school-motto {
+        margin-top: 2mm;
+        color: {{ branding.colors.accent|default:"#b68a28" }};
+        font-size: 9pt;
+        font-style: italic;
+        font-weight: 700;
+        letter-spacing: 0.5pt;
+    }
+
+    .certificate-school-contact {
+        margin-top: 1.5mm;
+        color: #65707d;
+        font-size: 8pt;
+        line-height: 1.4;
+    }
+
+    .certificate-letterhead__reference {
+        width: 32mm;
+        text-align: right;
+        color: #65707d;
+        font-size: 7.5pt;
+        line-height: 1.5;
+    }
+
+    .certificate-divider {
+        position: relative;
+        width: 72%;
+        height: 1pt;
+        margin: 3mm auto 6mm;
+        background: {{ branding.colors.primary|default:"#173b63" }};
+    }
+
+    .certificate-divider::after {
+        content: "";
+        position: absolute;
+        top: -1.2pt;
+        left: 34%;
+        width: 32%;
+        height: 3.4pt;
+        background: {{ branding.colors.accent|default:"#d3aa4d" }};
+    }
+
+    .certificate-kicker {
+        margin-bottom: 1.5mm;
+        color: #697583;
+        font-size: 8pt;
+        font-weight: 700;
+        letter-spacing: 2.4pt;
+        text-transform: uppercase;
+    }
+
+    .certificate-title {
+        margin: 0;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-family: {{ branding.heading_font_family|default:branding.font_family }};
+        font-size: 28pt;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: 1.6pt;
+        text-transform: uppercase;
+    }
+
+    .certificate-introduction {
+        margin-top: 5mm;
+        color: #596471;
+        font-size: 10pt;
+        font-style: italic;
+    }
+
+    .certificate-recipient-name {
+        display: inline-block;
+        min-width: 62%;
+        margin-top: 3mm;
+        padding: 0 10mm 2mm;
+        border-bottom: 1.2pt solid {{ branding.colors.accent|default:"#d3aa4d" }};
+        color: #182b42;
+        font-family: Georgia, Times New Roman, serif;
+        font-size: 27pt;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: 0.8pt;
+        text-transform: uppercase;
+    }
+
+    .certificate-citation {
+        max-width: 78%;
+        margin: 4mm auto 0;
+        color: #3f4a57;
+        font-size: 10.5pt;
+        line-height: 1.65;
+    }
+
+    .certificate-summary {
+        display: table;
+        width: 82%;
+        margin: 6mm auto 0;
+        border-spacing: 4mm 0;
+    }
+
+    .certificate-summary__item {
+        display: table-cell;
+        width: 33.333%;
+        padding: 3mm 4mm;
+        border: 0.6pt solid #d1d9e2;
+        border-top: 2.2pt solid {{ branding.colors.accent|default:"#d3aa4d" }};
+        background: #f9fbfd;
+        vertical-align: middle;
+    }
+
+    .certificate-summary__label {
+        color: #6e7986;
+        font-size: 6.7pt;
+        font-weight: 800;
+        letter-spacing: 0.7pt;
+        text-transform: uppercase;
+    }
+
+    .certificate-summary__value {
+        margin-top: 1.5mm;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 11pt;
+        font-weight: 800;
+    }
+
+    .certificate-bottom {
+        display: table;
+        width: 100%;
+        margin-top: 10mm;
+        table-layout: fixed;
+    }
+
+    .certificate-signatory,
+    .certificate-seal-area,
+    .certificate-verification {
+        display: table-cell;
+        width: 33.333%;
+        vertical-align: bottom;
+    }
+
+    .certificate-signatory {
+        padding: 0 6mm;
+        text-align: center;
+    }
+
+    .certificate-signature-space {
+    height: 17mm;
+    text-align: center;
+}
+
+.certificate-signature-image {
+    display: block;
+    width: auto;
+    max-width: 42mm;
+    height: 13mm;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.certificate-signature-placeholder {
+    padding-top: 8mm;
+    color: #a0a8b1;
+    font-size: 6pt;
+    font-style: italic;
+}
+.certificate-verification__url {
+    max-width: 44mm;
+    margin: 0.8mm auto 0;
+    overflow-wrap: anywhere;
+    color: #78828d;
+    font-size: 4.8pt;
+    line-height: 1.25;
+}
+
+.certificate-signatory__line {
+    width: 82%;
+    margin: 0 auto 1.7mm;
+    border-top: 0.8pt solid #354250;
+}
+
+.certificate-signatory__name {
+    color: {{ branding.colors.primary|default:"#173b63" }};
+    font-size: 9pt;
+    font-weight: 800;
+}
+
+.certificate-signatory__title {
+    margin-top: 0.8mm;
+    color: #687381;
+    font-size: 7pt;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+    .certificate-seal-area {
+        text-align: center;
+    }
+
+    .certificate-seal {
+    position: relative;
+    display: inline-block;
+    width: 30mm;
+    height: 30mm;
+    border: 1.5pt solid {{ branding.colors.accent|default:"#d3aa4d" }};
+    border-radius: 50%;
+    color: {{ branding.colors.primary|default:"#173b63" }};
+    text-align: center;
+}
+
+.certificate-seal::before {
+    content: "";
+    position: absolute;
+    inset: 2mm;
+    border: 0.8pt solid {{ branding.colors.primary|default:"#173b63" }};
+    border-radius: 50%;
+}
+
+.certificate-seal__outer-text {
+    position: absolute;
+    top: 3.4mm;
+    right: 3mm;
+    left: 3mm;
+    z-index: 2;
+    overflow: hidden;
+    color: {{ branding.colors.primary|default:"#173b63" }};
+    font-size: 3.8pt;
+    font-weight: 800;
+    letter-spacing: 0.35pt;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-top: 8.8mm;
+}
+
+.certificate-seal__centre {
+    position: relative;
+    z-index: 2;
+    padding-top: 8mm;
+}
+
+.certificate-seal__star {
+    color: {{ branding.colors.accent|default:"#d3aa4d" }};
+    font-size: 7pt;
+    line-height: 1;
+}
+
+.certificate-seal__main {
+    margin-top: 0.7mm;
+    font-size: 5.8pt;
+    font-weight: 900;
+    letter-spacing: 0.5pt;
+}
+
+.certificate-seal__sub {
+    font-size: 5pt;
+    font-weight: 800;
+    letter-spacing: 0.8pt;
+}
+
+.certificate-seal__country {
+    margin-top: 0.7mm;
+    color: #65707d;
+    font-size: 4.3pt;
+    font-weight: 700;
+    letter-spacing: 0.5pt;
+}
+
+.certificate-stamp-image {
+    display: block;
+    width: auto;
+    max-width: 30mm;
+    height: 30mm;
+    margin: auto;
+    object-fit: contain;
+}
+    .certificate-verification {
+        text-align: center;
+    }
+
+    .certificate-qr {
+        display: block;
+        width: 22mm;
+        height: 22mm;
+        margin: 0 auto 1.5mm;
+        object-fit: contain;
+    }
+
+    .certificate-qr-placeholder {
+        display: table;
+        width: 22mm;
+        height: 22mm;
+        margin: 0 auto 1.5mm;
+        border: 0.7pt solid #9faab6;
+        background:
+            linear-gradient(45deg, #26384c 25%, transparent 25%) 0 0 / 4mm 4mm,
+            linear-gradient(-45deg, #26384c 25%, transparent 25%) 0 0 / 4mm 4mm,
+            linear-gradient(45deg, transparent 75%, #26384c 75%) 0 0 / 4mm 4mm,
+            linear-gradient(-45deg, transparent 75%, #26384c 75%) 0 0 / 4mm 4mm;
+    }
+
+    .certificate-qr-placeholder span {
+        display: table-cell;
+        background: rgba(255, 255, 255, 0.88);
+        color: #26384c;
+        font-size: 6pt;
+        font-weight: 800;
+        vertical-align: middle;
+    }
+
+    .certificate-verification__title {
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 7.3pt;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .certificate-verification__code {
+        margin-top: 1mm;
+        color: #56616e;
+        font-family: DejaVu Sans Mono, monospace;
+        font-size: 6.8pt;
+    }
+
+    .certificate-footer-note {
+        margin-top: 5mm;
+        padding-top: 2.5mm;
+        border-top: 0.4pt solid #d8dee5;
+        color: #7a8490;
+        font-size: 6.6pt;
+        line-height: 1.4;
+        text-align: center;
+    }
+.certificate-footer-note__main {
+    color: #65707d;
+    font-size: 6.2pt;
+}
+
+.certificate-footer-note__security {
+    margin-top: 1mm;
+    color: #89929d;
+    font-size: 5.6pt;
+    font-weight: 600;
+    letter-spacing: 0.25pt;
+    text-transform: uppercase;
+}
+    .certificate-watermark {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    width: 72%;
+    z-index: 0;
+    color: {{ branding.colors.primary|default:"#173b63" }};
+    font-family: Georgia, Times New Roman, serif;
+    font-size: 58pt;
+    font-weight: 800;
+    letter-spacing: 8pt;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    opacity: 0.028;
+    transform: translate(-50%, -50%) rotate(-20deg);
+    pointer-events: none;
+}
+
+.certificate-watermark__image {
+    display: block;
+    width: 70mm;
+    height: 70mm;
+    margin: auto;
+    object-fit: contain;
+    opacity: 0.9;
+}
+.certificate-ornament {
+    display: table;
+    width: 42%;
+    margin: 0 auto 3mm;
+}
+
+.certificate-ornament__line,
+.certificate-ornament__symbol {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.certificate-ornament__line {
+    width: 46%;
+    border-top: 0.7pt solid {{ branding.colors.accent|default:"#d3aa4d" }};
+}
+
+.certificate-ornament__symbol {
+    width: 8%;
+    padding: 0 3mm;
+    color: {{ branding.colors.accent|default:"#d3aa4d" }};
+    font-size: 8pt;
+    text-align: center;
+}
+</style>
+
+<main class="certificate-document">
+
+    <section class="certificate-frame">
+        <div class="certificate-inner">
+
+            <div class="certificate-watermark" aria-hidden="true">
+    {% if branding.watermark_image %}
+        <img
+            src="{{ branding.watermark_image }}"
+            alt=""
+            class="certificate-watermark__image"
+        >
+    {% else %}
+        <span>{{ branding.watermark_text|default:"ASMS" }}</span>
+    {% endif %}
+</div>
+
+            <header class="certificate-letterhead">
+
+                <div class="certificate-letterhead__logo">
+                    {% if branding.logo_url %}
+                        <img
+                            class="certificate-logo"
+                            src="{{ branding.logo_url }}"
+                            alt="{{ school_name }} logo"
+                        >
+                    {% endif %}
+                </div>
+
+                <div class="certificate-letterhead__identity">
+                    <h2 class="certificate-school-name">
+                        {{ school_name }}
+                    </h2>
+
+                    {% if branding.school_motto %}
+                        <div class="certificate-school-motto">
+                            “{{ branding.school_motto }}”
+                        </div>
+                    {% endif %}
+
+                    <div class="certificate-school-contact">
+                        {{ branding.school_address }}
+                        {% if branding.school_phone %}
+                            • Tel: {{ branding.school_phone }}
+                        {% endif %}
+                        {% if branding.school_email %}
+                            • {{ branding.school_email }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="certificate-letterhead__reference">
+                    Certificate No.<br>
+                    <strong>{{ serial_number|default:"—" }}</strong>
+                </div>
+
+            </header>
+
+            <div class="certificate-divider"></div>
+
+            <div class="certificate-ornament" aria-hidden="true">
+    <span class="certificate-ornament__line"></span>
+    <span class="certificate-ornament__symbol">◆</span>
+    <span class="certificate-ornament__line"></span>
+</div>
+
+<div class="certificate-kicker">
+    Official Institutional Recognition
+</div>
+
+
 
             <h1 class="certificate-title">
                 {{ certificate_type_display|default:"Certificate" }}
             </h1>
-        </div>
 
-        <div class="certificate-recipient">
-            <div class="certificate-recipient__label">
-                is proudly presented to
+            <div class="certificate-introduction">
+                This certificate is proudly presented to
             </div>
 
-            <div class="certificate-recipient__name">
+            <div class="certificate-recipient-name">
                 {{ student_name }}
             </div>
 
-            <div class="certificate-recipient__citation">
+            <div class="certificate-citation">
                 {{ citation_text|default:"In recognition of outstanding achievement and the successful fulfilment of the institution's academic requirements." }}
             </div>
-        </div>
 
-        <section class="summary-grid certificate-summary">
-            <div class="summary-card">
-                <div class="summary-card__label">Certificate No.</div>
-                <div class="summary-card__value">{{ serial_number|default:"—" }}</div>
-            </div>
+            <section class="certificate-summary">
 
-            <div class="summary-card">
-                <div class="summary-card__label">Issue Date</div>
-                <div class="summary-card__value">{{ issued_at|default:"—" }}</div>
-            </div>
-
-            {% if student_number %}
-            <div class="summary-card">
-                <div class="summary-card__label">Student Number</div>
-                <div class="summary-card__value value--mono">{{ student_number }}</div>
-            </div>
-            {% endif %}
-        </section>
-
-        <aside class="document-notice document-notice--neutral">
-            <div class="document-notice__icon">✓</div>
-            <div>
-                <div class="document-notice__title">Official Institutional Certificate</div>
-                <div class="document-notice__text">
-                    This certificate is an official document of {{ school_name }} and may be verified using the QR code or verification reference.
-                </div>
-            </div>
-        </aside>
-
-        <section class="transcript-certification avoid-break">
-            <div class="transcript-certification__signing-area">
-                <div class="transcript-certification__stamp">
-                    {% include "reports/shared/_stamp_block.html" %}
+                <div class="certificate-summary__item">
+                    <div class="certificate-summary__label">
+                        Certificate Number
+                    </div>
+                    <div class="certificate-summary__value">
+                        {{ serial_number|default:"—" }}
+                    </div>
                 </div>
 
-                <div class="transcript-certification__signature">
-                    {% include "reports/shared/_signature_block.html" %}
+                <div class="certificate-summary__item">
+                    <div class="certificate-summary__label">
+                        Date of Issue
+                    </div>
+                    <div class="certificate-summary__value">
+                        {{ issued_at|default:"—" }}
+                    </div>
                 </div>
-            </div>
 
-            <div class="transcript-certification__verification">
-                {% include "reports/shared/_qr_block.html" %}
-            </div>
-        </section>
+                <div class="certificate-summary__item">
+                    <div class="certificate-summary__label">
+                        Student Number
+                    </div>
+                    <div class="certificate-summary__value">
+                        {{ student_number|default:"—" }}
+                    </div>
+                </div>
 
+            </section>
+
+            <section class="certificate-bottom">
+
+                <div class="certificate-signatory">
+
+    <div class="certificate-signature-space">
+        {% if headteacher_signature_url %}
+            <img
+                class="certificate-signature-image"
+                src="{{ headteacher_signature_url }}"
+                alt="Headteacher signature"
+            >
+        {% else %}
+            <div class="certificate-signature-placeholder">
+                Authorised Signature
+            </div>
+        {% endif %}
     </div>
 
-</section>
+    <div class="certificate-signatory__line"></div>
+
+    <div class="certificate-signatory__name">
+        {{ headteacher_name|default:"Headteacher" }}
+    </div>
+
+    <div class="certificate-signatory__title">
+        {{ headteacher_title|default:"Headteacher" }}
+    </div>
+
+</div>
+                <div class="certificate-seal-area">
+
+                    {% if stamp_url %}
+    <img
+        class="certificate-stamp-image"
+        src="{{ stamp_url }}"
+        alt="Official school stamp"
+    >
+{% else %}
+    <div class="certificate-seal">
+        <div class="certificate-seal__outer-text">
+            {{ school_name }}
+        </div>
+
+        <div class="certificate-seal__centre">
+            <div class="certificate-seal__star">★</div>
+            <div class="certificate-seal__main">OFFICIAL</div>
+            <div class="certificate-seal__sub">SEAL</div>
+            <div class="certificate-seal__country">UGANDA</div>
+        </div>
+    </div>
+{% endif %}
+                </div>
+
+                <div class="certificate-verification">
+
+                    {% if qr_code_url %}
+                        <img
+                            class="certificate-qr"
+                            src="{{ qr_code_url }}"
+                            alt="Certificate verification QR code"
+                        >
+                    {% else %}
+                        <div class="certificate-qr-placeholder">
+                            <span>QR</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="certificate-verification__title">
+    Scan to verify authenticity
+</div>
+
+<div class="certificate-verification__code">
+    Ref: {{ verification_code|default:serial_number }}
+</div>
+
+{% if verification_url %}
+<div class="certificate-verification__url">
+    {{ verification_url }}
+</div>
+{% endif %}
+
+                </div>
+
+            </section>
+
+           <footer class="certificate-footer-note">
+    <div class="certificate-footer-note__main">
+        Official computer-generated certificate issued by
+        <strong>{{ school_name }}</strong> through ASMS.
+    </div>
+
+    <div class="certificate-footer-note__security">
+        Unique reference: {{ verification_code|default:serial_number }}
+        &nbsp;•&nbsp;
+        Any unauthorised alteration renders this document invalid.
+    </div>
+</footer>
+
+        </div>
+    </section>
 
 </main>
-
-{% include "reports/shared/_footer.html" %}
