@@ -316,88 +316,88 @@ class CertificateViewSet(
         )
 
         return Response(output.data)
-    
-@action(
-    detail=False,
-    methods=["get"],
-    url_path="template-preview",
-    permission_classes=[AllowAny],
-)
-def template_preview(self, request):
-    verification_url = (
-        "http://127.0.0.1:8000/api/reports/"
-        "certificates/verify/CERT-2026-000001/"
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="template-preview",
+        permission_classes=[AllowAny],
     )
-    context = {
-        "certificate_type_display": "Certificate of Academic Excellence",
-        "student_name": "Joseph Alia",
-        "school_id_number": "25/U/08624/PS",
-        "citation_text": (
-            "In recognition of outstanding academic performance, exemplary "
-            "discipline, and successful fulfilment of the institution's "
-            "academic requirements."
-        ),
+    def template_preview(self, request):
+        verification_url = (
+            "http://127.0.0.1:8000/api/reports/"
+            "certificates/verify/CERT-2026-000001/"
+        )
+        context = {
+            "certificate_type_display": "Certificate of Academic Excellence",
+            "student_name": "Joseph Alia",
+            "school_id_number": "25/U/08624/PS",
+            "citation_text": (
+                "In recognition of outstanding academic performance, exemplary "
+                "discipline, and successful fulfilment of the institution's "
+                "academic requirements."
+            ),
 
-        "serial_number": "CERT-2026-000001",
-        "issued_at": "29 July 2026",
-        "student_number": "25/U/08624/PS",
-        "school_name": "ALIA Demonstration Secondary School",
-
-        "headteacher_name": "Dr Sarah Namusoke",
-        "headteacher_title": "Headteacher",
-
-        "headteacher_signature_url": (
-            "/static/reports/images/demo-signature.png"
-        ),
-        "stamp_url": "/static/reports/images/demo-stamp.png",
-        "verification_code": "CERT-2026-000001",
-        "verification_url": verification_url,
-        "qr_code_url": CertificateTemplateViewSet.generate_qr_data_uri(
-            verification_url
-        ),
-
-        "branding": {
+            "serial_number": "CERT-2026-000001",
+            "issued_at": "29 July 2026",
+            "student_number": "25/U/08624/PS",
             "school_name": "ALIA Demonstration Secondary School",
-            "school_motto": "Knowledge, Discipline and Excellence",
-            "school_address": "Kampala, Uganda",
-            "school_phone": "+256 700 000000",
-            "school_email": "info@aliaschool.ac.ug",
 
-            "font_family": "'DejaVu Sans', Arial, sans-serif",
-            "heading_font_family": "Georgia, 'Times New Roman', serif",
-            "font_size_base": "10.5pt",
+            "headteacher_name": "Dr Sarah Namusoke",
+            "headteacher_title": "Headteacher",
 
-            "logo_url": "/static/reports/images/demo-school-logo.png",
-            "background_image": "",
-            "watermark_image": "",
-            "watermark_text": "ALIA",
+            "headteacher_signature_url": (
+                "/static/reports/images/demo-signature.png"
+            ),
+            "stamp_url": "/static/reports/images/demo-stamp.png",
+            "verification_code": "CERT-2026-000001",
+            "verification_url": verification_url,
+            "qr_code_url": CertificateTemplateViewSet.generate_qr_data_uri(
+                verification_url
+            ),
 
-            "colors": {
-                "primary": "#173b63",
-                "secondary": "#5f6976",
-                "accent": "#d3aa4d",
+            "branding": {
+                "school_name": "ALIA Demonstration Secondary School",
+                "school_motto": "Knowledge, Discipline and Excellence",
+                "school_address": "Kampala, Uganda",
+                "school_phone": "+256 700 000000",
+                "school_email": "info@aliaschool.ac.ug",
+
+                "font_family": "'DejaVu Sans', Arial, sans-serif",
+                "heading_font_family": "Georgia, 'Times New Roman', serif",
+                "font_size_base": "10.5pt",
+
+                "logo_url": "/static/reports/images/demo-school-logo.png",
+                "background_image": "",
+                "watermark_image": "",
+                "watermark_text": "ALIA",
+
+                "colors": {
+                    "primary": "#173b63",
+                    "secondary": "#5f6976",
+                    "accent": "#d3aa4d",
+                },
             },
-        },
 
-        "page_config": {
-            "page_size": "A4",
-            "orientation": "landscape",
-            "margins": {
-                "top": "12mm",
-                "right": "12mm",
-                "bottom": "12mm",
-                "left": "12mm",
+            "page_config": {
+                "page_size": "A4",
+                "orientation": "landscape",
+                "margins": {
+                    "top": "12mm",
+                    "right": "12mm",
+                    "bottom": "12mm",
+                    "left": "12mm",
+                },
             },
-        },
 
-        "layout_config": {},
-    }
+            "layout_config": {},
+        }
 
-    return render(
-        request,
-        "reports/certificate/document.html",
-        context,
-    )
+        return render(
+            request,
+            "reports/certificate/document.html",
+            context,
+        )
 
     @action(
         detail=True,
@@ -427,12 +427,12 @@ def template_preview(self, request):
         )
 
     @action(
-    detail=False,
-    methods=["get"],
-    url_path=r"verify/(?P<verification_code>[^/.]+)",
-    permission_classes=[AllowAny],
-    authentication_classes=[],
-)
+        detail=False,
+        methods=["get"],
+        url_path=r"verify/(?P<verification_code>[^/.]+)",
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+    )
     def verify(self, request, verification_code=None):
         certificate = (
             Certificate.objects.select_related(
@@ -530,13 +530,13 @@ def template_preview(self, request):
 
             "layout_config": {},
             "document_hash": certificate.file_hash,
-"integrity_status": (
-    "Fingerprint recorded"
-    if certificate.file_hash
-    else "Fingerprint not yet recorded"
-),
-"is_revoked": certificate.is_revoked,
-"revoked_reason": certificate.revoked_reason,
+            "integrity_status": (
+                "Fingerprint recorded"
+                if certificate.file_hash
+                else "Fingerprint not yet recorded"
+            ),
+            "is_revoked": certificate.is_revoked,
+            "revoked_reason": certificate.revoked_reason,
         }
 
         return render(
