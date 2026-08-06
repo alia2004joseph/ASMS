@@ -135,7 +135,8 @@ The template remains compatible with the original minimum context.
                     {% for snapshot in gpa_snapshots %}
                         <tr>
                             <td>
-                                <strong>{{ snapshot.term }}</strong>
+                                <strong>{{ snapshot.term_name_snapshot }}</strong>
+                                <div class="text-muted">{{ snapshot.academic_year_snapshot }}</div>
                             </td>
                             <td class="text-center">{{ snapshot.term_gpa|default:"—" }}</td>
                             <td class="text-center">{{ snapshot.cumulative_gpa|default:"—" }}</td>
