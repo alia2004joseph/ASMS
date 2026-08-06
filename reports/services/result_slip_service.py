@@ -400,8 +400,7 @@ def generate_result_slip(
         student=student,
         academic_year=academic_year,
         term=term,
-        class_ref=class_ref,
-        subjects_snapshot=snapshot["subjects"],
+        classroom=class_ref,
         aggregate_or_gpa=snapshot["aggregate_or_gpa"],
         position=snapshot["position"] if show_position else None,
         class_average=snapshot["class_average"],
@@ -460,7 +459,7 @@ def regenerate_result_slip(
             "student",
             "term",
             "academic_year",
-            "class_ref",
+            "classroom",
             "school",
         )
         .get(pk=previous.pk)
@@ -479,7 +478,7 @@ def regenerate_result_slip(
         student=previous.student,
         academic_year=previous.academic_year,
         term=previous.term,
-        class_ref=previous.class_ref,
+        class_ref=previous.classroom,
         school=previous.school,
         generated_by=generated_by,
     )

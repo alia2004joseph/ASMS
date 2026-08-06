@@ -206,7 +206,7 @@ class TranscriptViewSet(viewsets.ViewSet):
         )
 
     def _get_student(self, request, student_id):
-        Student = apps.get_model("students", "Student")
+        Student = apps.get_model("accounts", "StudentProfile")
         return Student.objects.get(pk=student_id, school=request.user.school)
 
     def _get_terms(self, term_ids):

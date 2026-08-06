@@ -20,6 +20,7 @@ from reports.viewsets.id_card_viewsets import IDCardViewSet
 from reports.viewsets.performance_history_viewsets import (
     PerformanceHistoryViewSet,
 )
+from reports.viewsets.result_slip_viewsets import ResultSlipViewSet
 from reports.viewsets.seating_viewsets import (
     InvigilatorAssignmentViewSet,
     SeatAssignmentViewSet,
@@ -67,6 +68,13 @@ router.register(
     r"transcripts",
     TranscriptViewSet,
     basename="transcript",
+)
+
+# Result Slips
+router.register(
+    r"result-slips",
+    ResultSlipViewSet,
+    basename="result-slip",
 )
 
 # ID Cards
