@@ -202,7 +202,9 @@ def _normalise_live_performance(raw: Any) -> LivePerformance:
             "class_position cannot exceed class_size."
         )
 
-    summary = str(_extract(raw, "performance_summary", "") or "").strip()
+    summary = str(
+        _extract(raw, "performance_summary", default="") or ""
+    ).strip()
     if len(summary) > MAX_SUMMARY_LENGTH:
         raise ValidationError(
             f"performance_summary may not exceed "
@@ -210,10 +212,10 @@ def _normalise_live_performance(raw: Any) -> LivePerformance:
         )
 
     grading_policy_version = str(
-        _extract(raw, "grading_policy_version", "") or ""
+        _extract(raw, "grading_policy_version", default="") or ""
     ).strip()
     computation_reference = str(
-        _extract(raw, "computation_reference", "") or ""
+        _extract(raw, "computation_reference", default="") or ""
     ).strip()
 
     return LivePerformance(
@@ -225,7 +227,7 @@ def _normalise_live_performance(raw: Any) -> LivePerformance:
         class_position=class_position,
         class_size=class_size,
         subject_positions=_normalise_subject_positions(
-            _extract(raw, "subject_positions", {})
+            _extract(raw, "subject_positions", default={})
         ),
         class_average=_decimal_or_none(
             _extract(raw, "class_average"),

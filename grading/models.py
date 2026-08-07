@@ -325,6 +325,91 @@ class GradeHistory(models.Model):
         raise ValidationError("GradeHistory records cannot be deleted.")
 
 
+class GradingScale(models.Model):
+    """
+    A school-scoped, configurable grading scale.
+
+    No default boundaries are created anywhere in this project. A school
+    must explicitly configure its own GradeBoundary rows. Reports and
+    academics code must never fall back to hard-coded grade boundaries.
+    """
+
+    school = models.ForeignKey(
+        School, on_delete=models.CASCADE, related_name="grading_scales",
+    )
+    name = models.CharField(max_length=100)
+    is_active = models.BooleanField(
+        default=False,
+        help_text="Indicates the scale currently used for this school.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["school", "name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["school", "name"],
+                name="uniq_gradingscale_school_name",
+            ),
+            models.UniqueConstraint(
+                fields=["school"],
+                condition=models.Q(is_active=True),
+                name="one_active_gradingscale_per_school",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.school})"
+
+
+class GradeBoundary(models.Model):
+    """
+    One grade band within a GradingScale, e.g. 80-100 = 'A'.
+
+    min_percentage is inclusive, max_percentage is inclusive.
+    grade_point is optional and only required if a school wants GPA output.
+    """
+
+    scale = models.ForeignKey(
+        GradingScale, on_delete=models.CASCADE, related_name="boundaries",
+    )
+    grade_symbol = models.CharField(max_length=10)
+    min_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    max_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    grade_point = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True,
+    )
+    remark = models.CharField(max_length=100, blank=True)
+    is_passing = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["-min_percentage"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["scale", "grade_symbol"],
+                name="uniq_gradeboundary_scale_symbol",
+            ),
+        ]
+
+    def clean(self):
+        errors = {}
+        if self.min_percentage is not None and self.max_percentage is not None:
+            if self.min_percentage > self.max_percentage:
+                errors["min_percentage"] = (
+                    "The minimum percentage cannot exceed the maximum."
+                )
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.grade_symbol} ({self.min_percentage}-{self.max_percentage})"
+
+
 class SubjectApprovalStatus(models.TextChoices):
     PENDING = "pending", "Pending"
     APPROVED = "approved", "Approved"

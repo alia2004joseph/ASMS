@@ -84,7 +84,7 @@ class ResultSlipGenerateRequestSerializer(serializers.Serializer):
             field_name="academic_year_id",
         )
         attrs["_term"] = _resolve(
-            "academics", "Term", attrs["term_id"],
+            "academics", "AcademicTerm", attrs["term_id"],
             field_name="term_id",
         )
         attrs["_classroom"] = _resolve(
