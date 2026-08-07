@@ -274,23 +274,23 @@ Designed for HTML preview and WeasyPrint PDF rendering.
     }
 
     .meta-grid {
-        display: table;
+        display: flex;
+        flex-wrap: wrap;
         width: 100%;
         margin: 0 0 13pt;
-        border-collapse: separate;
-        border-spacing: 6pt 6pt;
+        gap: 6pt;
         page-break-inside: avoid;
     }
 
     .meta-row {
-        display: table-row;
+        display: contents;
     }
 
     .meta-grid .field,
     .meta-card {
-        display: table-cell;
-        width: 50%;
+        flex: 1 1 calc(50% - 6pt);
         min-width: 0;
+        box-sizing: border-box;
         padding: 7pt 9pt;
         vertical-align: top;
         border: 0.55pt solid #dce2e9;
@@ -316,7 +316,8 @@ Designed for HTML preview and WeasyPrint PDF rendering.
         font-size: 9.7pt;
         font-weight: 700;
         line-height: 1.35;
-        overflow-wrap: anywhere;
+        word-break: normal;
+        overflow-wrap: break-word;
     }
 
     .meta-card--highlight {
@@ -325,8 +326,7 @@ Designed for HTML preview and WeasyPrint PDF rendering.
     }
 
     .meta-card--full {
-        display: block;
-        width: 100%;
+        flex-basis: 100%;
     }
 
     .info-strip {
@@ -563,9 +563,70 @@ Designed for HTML preview and WeasyPrint PDF rendering.
         background: #fff9ed;
     }
 
-    .callout--danger {
-        border-left-color: #a43d3d;
-        background: #fff3f3;
+    .document-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 8pt;
+        margin: 0 0 12pt;
+        padding: 8pt 10pt;
+        border: 0.6pt solid #d8e0e8;
+        border-left: 3pt solid {{ branding.colors.primary|default:"#173b63" }};
+        background: #f7f9fb;
+        page-break-inside: avoid;
+    }
+
+    .document-notice__icon {
+        flex: 0 0 auto;
+        width: 16pt;
+        height: 16pt;
+        line-height: 16pt;
+        text-align: center;
+        border-radius: 50%;
+        background: {{ branding.colors.primary|default:"#173b63" }};
+        color: #ffffff;
+        font-size: 8.5pt;
+        font-weight: 800;
+    }
+
+    .document-notice__title {
+        margin-bottom: 2pt;
+        color: {{ branding.colors.primary|default:"#173b63" }};
+        font-size: 8.2pt;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.3pt;
+    }
+
+    .document-notice__text {
+        color: #4e5966;
+        font-size: 8.4pt;
+        line-height: 1.4;
+    }
+
+    .document-notice--warning {
+        border-left-color: #b98520;
+        background: #fff9ed;
+    }
+
+    .document-notice--warning .document-notice__icon {
+        background: #b98520;
+    }
+
+    .document-notice--warning .document-notice__title {
+        color: #8a611b;
+    }
+
+    .document-notice--neutral {
+        border-left-color: #3c8250;
+        background: #f1f8f3;
+    }
+
+    .document-notice--neutral .document-notice__icon {
+        background: #3c8250;
+    }
+
+    .document-notice--neutral .document-notice__title {
+        color: #2c6b3f;
     }
 
     .signature-grid {
