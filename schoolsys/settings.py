@@ -53,6 +53,9 @@ INSTALLED_APPS = [
     "reports",
     "communications",
 
+    # Class Management representatives app (scaffold)
+    "class_management.representatives",
+
     
 ]
 
